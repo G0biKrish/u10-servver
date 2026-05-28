@@ -15,7 +15,7 @@
 // ---------------------------------------------------------------------------
 
 /** Base coin rewards for Day 1–7 (Cycle 1). */
-const DAILY_REWARDS_BASE: number[] = [50, 75, 100, 125, 150, 200, 500];
+const DAILY_REWARDS_BASE: number[] = [50, 75, 100, 125, 150, 200, 350];
 
 /** Coin entry fee for each arena tier. */
 const ARENA_ENTRY_FEES: Record<string, number> = {
@@ -34,8 +34,11 @@ function readPlayerStats(nk: nkruntime.Nakama, userId: string): any {
   const defaults = {
     wins: 0, total_played: 0, best_streak: 0, lp: 0,
     tier: "Bronze", coins: 0, level: 1, xp: 0,
-    login_streak: 0, last_login_claim: 0, last_wheel_spin: 0,
+    last_wheel_spin: 0,
     current_cycle: 1, active_streak_shields: 0, welcome_back_eligible: false,
+    weekly_claims: [false, false, false, false, false, false, false],
+    week_number: 0,
+    week_year: 0,
   };
   const result = nk.storageRead([{ collection: "player_stats", key: "stats", userId }]);
   return (result && result.length > 0) ? { ...defaults, ...result[0].value } : defaults;
@@ -113,6 +116,64 @@ function writePlayerDailyLimits(nk: nkruntime.Nakama, userId: string, limits: an
 }
 
 // ---------------------------------------------------------------------------
+// Helpers for Calendar-Week Daily Rewards
+// ---------------------------------------------------------------------------
+
+function getISOWeek(date: Date): { week: number; year: number } {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  return { week, year: d.getUTCFullYear() };
+}
+
+function getTodayDayIndex(): number {
+  const day = new Date().getUTCDay(); // 0=Sun, 1=Mon...6=Sat
+  return day === 0 ? 6 : day - 1;     // Convert to 0=Mon...6=Sun
+}
+
+function getDailyRewardsStatusRpc(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  _payload: string
+): string {
+  const userId = ctx.userId;
+  if (!userId) throw new Error("Unauthenticated request.");
+
+  const stats = readPlayerStats(nk, userId);
+  const now = new Date();
+  const { week, year } = getISOWeek(now);
+  const todayIndex = getTodayDayIndex();
+
+  // Week rollover check
+  if (stats.week_number !== week || stats.week_year !== year) {
+    const prevFullWeek = (stats.weekly_claims || []).every((c: boolean) => c === true);
+    if (prevFullWeek) {
+      stats.current_cycle = Math.min((stats.current_cycle || 1) + 1, 3);
+    } else {
+      stats.current_cycle = 1;
+    }
+    stats.weekly_claims = [false, false, false, false, false, false, false];
+    stats.week_number = week;
+    stats.week_year = year;
+    writePlayerStats(nk, userId, stats);
+    logger.info(`[Economy] New ISO week detected (${week}/${year}). Rollover triggered. Cycle: ${stats.current_cycle}`);
+  }
+
+  const isTodayClaimed = stats.weekly_claims[todayIndex];
+
+  return JSON.stringify({
+    success: true,
+    weekly_claims: stats.weekly_claims,
+    today_index: todayIndex,
+    is_today_claimed: isTodayClaimed,
+    current_cycle: stats.current_cycle,
+  });
+}
+
+// ---------------------------------------------------------------------------
 // RPC: claim_daily_login
 // ---------------------------------------------------------------------------
 
@@ -127,103 +188,91 @@ function claimDailyLoginRpc(
 
   const stats = readPlayerStats(nk, userId);
   const inventory = readPlayerInventory(nk, userId);
-  const now = Date.now();
-  const ONE_DAY_MS = 86_400_000;
-  const TWO_DAYS_MS = 172_800_000;
+  const now = new Date();
+  const { week, year } = getISOWeek(now);
+  const todayIndex = getTodayDayIndex();
 
-  // 1. Cooldown check
-  if (stats.last_login_claim > 0 && (now - stats.last_login_claim) < ONE_DAY_MS) {
-    const remaining = Math.ceil((ONE_DAY_MS - (now - stats.last_login_claim)) / 1000);
-    return JSON.stringify({ success: false, error: "Already claimed today.", next_claim_in_sec: remaining });
-  }
-
-  let isStreakRecoveryActive = false;
-  let isWelcomeBackRewardActive = false;
-
-  // 2. Streak broken evaluation
-  if (stats.last_login_claim > 0 && (now - stats.last_login_claim) >= TWO_DAYS_MS) {
-    // Check if player has a Streak Shield active
-    if (stats.active_streak_shields > 0) {
-      stats.active_streak_shields = 0; // Consume the shield (cap is 1)
-      isStreakRecoveryActive = true;
-      stats.login_streak = (stats.login_streak % 7) + 1; // Keep streak going
-      logger.info(`[Economy] Streak preserved for player ${userId} using Streak Shield.`);
+  // Week rollover check
+  if (stats.week_number !== week || stats.week_year !== year) {
+    const prevFullWeek = (stats.weekly_claims || []).every((c: boolean) => c === true);
+    if (prevFullWeek) {
+      stats.current_cycle = Math.min((stats.current_cycle || 1) + 1, 3);
     } else {
-      // No shield, streak is broken
-      stats.login_streak = 1;
-      // Re-initialize cycle back to 1 on broken streak
       stats.current_cycle = 1;
-      // Mark as welcome back if absent for a longer period
-      isWelcomeBackRewardActive = true;
-      logger.info(`[Economy] Streak broken for player ${userId}. Resetting streak.`);
     }
-  } else {
-    // Regular claim - progress streak
-    if (stats.last_login_claim === 0) {
-      stats.login_streak = 1;
-    } else {
-      stats.login_streak = (stats.login_streak % 7) + 1;
-    }
+    stats.weekly_claims = [false, false, false, false, false, false, false];
+    stats.week_number = week;
+    stats.week_year = year;
   }
 
-  // 3. Cycle scaling computation (cap at Cycle 3)
+  // Check if today already claimed
+  if (stats.weekly_claims[todayIndex]) {
+    return JSON.stringify({ success: false, error: "Already claimed today." });
+  }
+
+  // Calculate reward
   const cycle = Math.min(stats.current_cycle || 1, 3);
-  let coinsGranted = 0;
+  const baseCoins = DAILY_REWARDS_BASE[todayIndex];
+  let coinsGranted = baseCoins;
 
-  if (isWelcomeBackRewardActive) {
-    coinsGranted = 150; // Welcome back fallback
-  } else {
-    const baseCoins = DAILY_REWARDS_BASE[stats.login_streak - 1];
-    if (stats.login_streak === 7) {
-      coinsGranted = baseCoins + (cycle - 1) * 100; // Cycle 1: 500c, Cycle 2: 600c, Cycle 3+: 700c
-    } else {
-      coinsGranted = baseCoins + (cycle - 1) * 15;  // Cycle 1: base, Cycle 2: +15c, Cycle 3+: +30c
+  // Add Cycle Daily scaling (+5c per day for Cycle 2, +10c per day for Cycle 3+)
+  coinsGranted += (cycle - 1) * 5;
+
+  let allDaysClaimedBonusApplied = false;
+
+  if (todayIndex === 6) { // Sunday
+    // Check if Mon-Sat (all previous 6 days) were claimed
+    const allPrevClaimed = stats.weekly_claims.slice(0, 6).every((c: boolean) => c === true);
+    if (allPrevClaimed) {
+      // Award Sunday Streak Bonus: 150c base + (cycle-1)*25
+      coinsGranted += 150 + (cycle - 1) * 25;
+      allDaysClaimedBonusApplied = true;
     }
   }
 
-  // 4. Award coins
+  // Update claim flags
+  stats.weekly_claims[todayIndex] = true;
   stats.coins += coinsGranted;
-  stats.last_login_claim = now;
-  nk.walletUpdate(userId, { coins: coinsGranted }, { source: "daily_login_streak", streak: stats.login_streak });
+  
+  // Wallet update
+  nk.walletUpdate(userId, { coins: coinsGranted }, { source: "daily_login_calendar", day_index: todayIndex, cycle: cycle });
 
-  // 5. Award GDD items based on day and cycle
+  // Award GDD items
   let grantedItemName = "";
-  if (!isWelcomeBackRewardActive) {
-    if (stats.login_streak === 3) {
-      inventory.spin_tokens += 1;
-      grantedItemName = "1x Extra Wheel Spin Token";
-    } else if (stats.login_streak === 5) {
-      inventory.shields.starter = Math.min((inventory.shields.starter || 0) + 1, 3);
-      grantedItemName = "1x Starter Arena Shield";
-    } else if (stats.login_streak === 7) {
-      inventory.spin_tokens += 2;
-      stats.active_streak_shields = 1; // Award Streak Shield (max 1)
-      
-      const cosmeticId = `card_back_cycle_${cycle}`;
-      if (inventory.unlocked_cosmetics.indexOf(cosmeticId) === -1) {
-        inventory.unlocked_cosmetics.push(cosmeticId);
-      }
-      grantedItemName = `2x Spin Tokens + 1x Streak Shield + Card Back Cycle ${cycle}`;
-      
-      // Advance to next cycle for upcoming streak
-      stats.current_cycle += 1;
+  if (todayIndex === 2) { // Wednesday (Day 3)
+    inventory.spin_tokens += 1;
+    grantedItemName = "1x Extra Wheel Spin Token";
+  } else if (todayIndex === 4) { // Friday (Day 5)
+    inventory.shields.starter = Math.min((inventory.shields.starter || 0) + 1, 3);
+    grantedItemName = "1x Starter Arena Shield";
+  } else if (todayIndex === 6) { // Sunday (Day 7)
+    inventory.spin_tokens += 1;
+    stats.active_streak_shields = 1; // Award 1 Streak Shield (cap is 1)
+    
+    // Check cycle unlock for cosmetic card back (cap at cycle 3)
+    const cosmeticId = `card_back_cycle_${cycle}`;
+    if (inventory.unlocked_cosmetics.indexOf(cosmeticId) === -1) {
+      inventory.unlocked_cosmetics.push(cosmeticId);
     }
+    
+    grantedItemName = `1x Spin Token + 1x Streak Shield + Card Back Cycle ${cycle}`;
   }
 
   writePlayerStats(nk, userId, stats);
   writePlayerInventory(nk, userId, inventory);
 
-  logger.info(`[Economy] Player ${userId} claimed Day ${stats.login_streak} reward: +${coinsGranted}c. ${grantedItemName}`);
+  logger.info(`[Economy] Player ${userId} claimed Day Index ${todayIndex} reward: +${coinsGranted}c. ${grantedItemName}`);
+
   return JSON.stringify({
     success: true,
     coins: stats.coins,
-    login_streak: stats.login_streak,
     reward_claimed: coinsGranted,
     item_claimed: grantedItemName,
-    streak_recovered: isStreakRecoveryActive,
-    welcome_back_applied: isWelcomeBackRewardActive,
+    weekly_claims: stats.weekly_claims,
     current_cycle: stats.current_cycle,
-    active_streak_shields: stats.active_streak_shields
+    today_index: todayIndex,
+    is_today_claimed: true,
+    all_days_claimed_bonus_applied: allDaysClaimedBonusApplied
   });
 }
 
@@ -827,6 +876,7 @@ function InitModule(
   initializer: nkruntime.Initializer
 ): void {
   initializer.registerRpc("claim_daily_login",  claimDailyLoginRpc);
+  initializer.registerRpc("get_daily_rewards_status", getDailyRewardsStatusRpc);
   initializer.registerRpc("spin_wheel",          spinWheelRpc);
   initializer.registerRpc("buy_cosmetic",        buyCosmeticRpc);
   initializer.registerRpc("ad_callback",         adCallbackRpc);
