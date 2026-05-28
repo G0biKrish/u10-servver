@@ -10,24 +10,13 @@
 //   - Server-authoritative match entry validation & loss protection
 //   - XP progression & level milestone rewards
 // =============================================================================
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 /** Base coin rewards for Day 1–7 (Cycle 1). */
-var DAILY_REWARDS_BASE = [50, 75, 100, 125, 150, 200, 350];
+const DAILY_REWARDS_BASE = [50, 75, 100, 125, 150, 200, 350];
 /** Coin entry fee for each arena tier. */
-var ARENA_ENTRY_FEES = {
+const ARENA_ENTRY_FEES = {
     starter: 100,
     bronze: 200,
     silver: 500,
@@ -38,7 +27,7 @@ var ARENA_ENTRY_FEES = {
 // Storage helpers
 // ---------------------------------------------------------------------------
 function readPlayerStats(nk, userId) {
-    var defaults = {
+    const defaults = {
         wins: 0, total_played: 0, best_streak: 0, lp: 0,
         tier: "Bronze", coins: 0, level: 1, xp: 0,
         last_wheel_spin: 0,
@@ -47,41 +36,41 @@ function readPlayerStats(nk, userId) {
         week_number: 0,
         week_year: 0,
     };
-    var result = nk.storageRead([{ collection: "player_stats", key: "stats", userId: userId }]);
-    return (result && result.length > 0) ? __assign(__assign({}, defaults), result[0].value) : defaults;
+    const result = nk.storageRead([{ collection: "player_stats", key: "stats", userId }]);
+    return (result && result.length > 0) ? Object.assign(Object.assign({}, defaults), result[0].value) : defaults;
 }
 function writePlayerStats(nk, userId, stats) {
     nk.storageWrite([{
             collection: "player_stats",
             key: "stats",
-            userId: userId,
+            userId,
             value: stats,
             permissionRead: 1,
             permissionWrite: 1,
         }]);
 }
 function readPlayerInventory(nk, userId) {
-    var defaults = {
+    const defaults = {
         spin_tokens: 0,
         shields: { starter: 0, bronze: 0, silver: 0, gold: 0, platinum: 0 },
         unlocked_cosmetics: ["card_back_default"],
         equipped_cosmetics: { card_back: "card_back_default", avatar_ring: "" }
     };
-    var result = nk.storageRead([{ collection: "player_inventory", key: "inventory", userId: userId }]);
-    return (result && result.length > 0) ? __assign(__assign({}, defaults), result[0].value) : defaults;
+    const result = nk.storageRead([{ collection: "player_inventory", key: "inventory", userId }]);
+    return (result && result.length > 0) ? Object.assign(Object.assign({}, defaults), result[0].value) : defaults;
 }
 function writePlayerInventory(nk, userId, inventory) {
     nk.storageWrite([{
             collection: "player_inventory",
             key: "inventory",
-            userId: userId,
+            userId,
             value: inventory,
             permissionRead: 1,
             permissionWrite: 0, // Server-only write (tamper-proof)
         }]);
 }
 function readPlayerDailyLimits(nk, userId) {
-    var defaults = {
+    const defaults = {
         spins_today_count: 0,
         spin_coins_today: 0,
         ad_multipliers_today: 0,
@@ -89,12 +78,12 @@ function readPlayerDailyLimits(nk, userId) {
         last_jackpot_timestamp: 0,
         last_ad_multiplier_timestamp: 0
     };
-    var result = nk.storageRead([{ collection: "player_daily_limits", key: "limits", userId: userId }]);
+    const result = nk.storageRead([{ collection: "player_daily_limits", key: "limits", userId }]);
     if (result && result.length > 0) {
-        var data = result[0].value;
-        var now = new Date();
-        var lastDate = new Date(data.last_spin_timestamp || 0);
-        var isNewDay = now.getUTCDate() !== lastDate.getUTCDate() ||
+        const data = result[0].value;
+        const now = new Date();
+        const lastDate = new Date(data.last_spin_timestamp || 0);
+        const isNewDay = now.getUTCDate() !== lastDate.getUTCDate() ||
             now.getUTCMonth() !== lastDate.getUTCMonth() ||
             now.getUTCFullYear() !== lastDate.getUTCFullYear();
         if (isNewDay) {
@@ -102,7 +91,7 @@ function readPlayerDailyLimits(nk, userId) {
             data.spin_coins_today = 0;
             data.ad_multipliers_today = 0;
         }
-        return __assign(__assign({}, defaults), data);
+        return Object.assign(Object.assign({}, defaults), data);
     }
     return defaults;
 }
@@ -110,7 +99,7 @@ function writePlayerDailyLimits(nk, userId, limits) {
     nk.storageWrite([{
             collection: "player_daily_limits",
             key: "limits",
-            userId: userId,
+            userId,
             value: limits,
             permissionRead: 1,
             permissionWrite: 0, // Server-only write
@@ -120,28 +109,28 @@ function writePlayerDailyLimits(nk, userId, limits) {
 // Helpers for Calendar-Week Daily Rewards
 // ---------------------------------------------------------------------------
 function getISOWeek(date) {
-    var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    var dayNum = d.getUTCDay() || 7;
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    var week = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
-    return { week: week, year: d.getUTCFullYear() };
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const week = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    return { week, year: d.getUTCFullYear() };
 }
 function getTodayDayIndex() {
-    var day = new Date().getUTCDay(); // 0=Sun, 1=Mon...6=Sat
+    const day = new Date().getUTCDay(); // 0=Sun, 1=Mon...6=Sat
     return day === 0 ? 6 : day - 1; // Convert to 0=Mon...6=Sun
 }
 function getDailyRewardsStatusRpc(ctx, logger, nk, _payload) {
-    var userId = ctx.userId;
+    const userId = ctx.userId;
     if (!userId)
         throw new Error("Unauthenticated request.");
-    var stats = readPlayerStats(nk, userId);
-    var now = new Date();
-    var _a = getISOWeek(now), week = _a.week, year = _a.year;
-    var todayIndex = getTodayDayIndex();
+    const stats = readPlayerStats(nk, userId);
+    const now = new Date();
+    const { week, year } = getISOWeek(now);
+    const todayIndex = getTodayDayIndex();
     // Week rollover check
     if (stats.week_number !== week || stats.week_year !== year) {
-        var prevFullWeek = (stats.weekly_claims || []).every(function (c) { return c === true; });
+        const prevFullWeek = (stats.weekly_claims || []).every((c) => c === true);
         if (prevFullWeek) {
             stats.current_cycle = Math.min((stats.current_cycle || 1) + 1, 3);
         }
@@ -152,9 +141,9 @@ function getDailyRewardsStatusRpc(ctx, logger, nk, _payload) {
         stats.week_number = week;
         stats.week_year = year;
         writePlayerStats(nk, userId, stats);
-        logger.info("[Economy] New ISO week detected (".concat(week, "/").concat(year, "). Rollover triggered. Cycle: ").concat(stats.current_cycle));
+        logger.info(`[Economy] New ISO week detected (${week}/${year}). Rollover triggered. Cycle: ${stats.current_cycle}`);
     }
-    var isTodayClaimed = stats.weekly_claims[todayIndex];
+    const isTodayClaimed = stats.weekly_claims[todayIndex];
     return JSON.stringify({
         success: true,
         weekly_claims: stats.weekly_claims,
@@ -167,17 +156,17 @@ function getDailyRewardsStatusRpc(ctx, logger, nk, _payload) {
 // RPC: claim_daily_login
 // ---------------------------------------------------------------------------
 function claimDailyLoginRpc(ctx, logger, nk, _payload) {
-    var userId = ctx.userId;
+    const userId = ctx.userId;
     if (!userId)
         throw new Error("Unauthenticated request.");
-    var stats = readPlayerStats(nk, userId);
-    var inventory = readPlayerInventory(nk, userId);
-    var now = new Date();
-    var _a = getISOWeek(now), week = _a.week, year = _a.year;
-    var todayIndex = getTodayDayIndex();
+    const stats = readPlayerStats(nk, userId);
+    const inventory = readPlayerInventory(nk, userId);
+    const now = new Date();
+    const { week, year } = getISOWeek(now);
+    const todayIndex = getTodayDayIndex();
     // Week rollover check
     if (stats.week_number !== week || stats.week_year !== year) {
-        var prevFullWeek = (stats.weekly_claims || []).every(function (c) { return c === true; });
+        const prevFullWeek = (stats.weekly_claims || []).every((c) => c === true);
         if (prevFullWeek) {
             stats.current_cycle = Math.min((stats.current_cycle || 1) + 1, 3);
         }
@@ -193,15 +182,15 @@ function claimDailyLoginRpc(ctx, logger, nk, _payload) {
         return JSON.stringify({ success: false, error: "Already claimed today." });
     }
     // Calculate reward
-    var cycle = Math.min(stats.current_cycle || 1, 3);
-    var baseCoins = DAILY_REWARDS_BASE[todayIndex];
-    var coinsGranted = baseCoins;
+    const cycle = Math.min(stats.current_cycle || 1, 3);
+    const baseCoins = DAILY_REWARDS_BASE[todayIndex];
+    let coinsGranted = baseCoins;
     // Add Cycle Daily scaling (+5c per day for Cycle 2, +10c per day for Cycle 3+)
     coinsGranted += (cycle - 1) * 5;
-    var allDaysClaimedBonusApplied = false;
+    let allDaysClaimedBonusApplied = false;
     if (todayIndex === 6) { // Sunday
         // Check if Mon-Sat (all previous 6 days) were claimed
-        var allPrevClaimed = stats.weekly_claims.slice(0, 6).every(function (c) { return c === true; });
+        const allPrevClaimed = stats.weekly_claims.slice(0, 6).every((c) => c === true);
         if (allPrevClaimed) {
             // Award Sunday Streak Bonus: 150c base + (cycle-1)*25
             coinsGranted += 150 + (cycle - 1) * 25;
@@ -214,7 +203,7 @@ function claimDailyLoginRpc(ctx, logger, nk, _payload) {
     // Wallet update
     nk.walletUpdate(userId, { coins: coinsGranted }, { source: "daily_login_calendar", day_index: todayIndex, cycle: cycle });
     // Award GDD items
-    var grantedItemName = "";
+    let grantedItemName = "";
     if (todayIndex === 2) { // Wednesday (Day 3)
         inventory.spin_tokens += 1;
         grantedItemName = "1x Extra Wheel Spin Token";
@@ -227,15 +216,15 @@ function claimDailyLoginRpc(ctx, logger, nk, _payload) {
         inventory.spin_tokens += 1;
         stats.active_streak_shields = 1; // Award 1 Streak Shield (cap is 1)
         // Check cycle unlock for cosmetic card back (cap at cycle 3)
-        var cosmeticId = "card_back_cycle_".concat(cycle);
+        const cosmeticId = `card_back_cycle_${cycle}`;
         if (inventory.unlocked_cosmetics.indexOf(cosmeticId) === -1) {
             inventory.unlocked_cosmetics.push(cosmeticId);
         }
-        grantedItemName = "1x Spin Token + 1x Streak Shield + Card Back Cycle ".concat(cycle);
+        grantedItemName = `1x Spin Token + 1x Streak Shield + Card Back Cycle ${cycle}`;
     }
     writePlayerStats(nk, userId, stats);
     writePlayerInventory(nk, userId, inventory);
-    logger.info("[Economy] Player ".concat(userId, " claimed Day Index ").concat(todayIndex, " reward: +").concat(coinsGranted, "c. ").concat(grantedItemName));
+    logger.info(`[Economy] Player ${userId} claimed Day Index ${todayIndex} reward: +${coinsGranted}c. ${grantedItemName}`);
     return JSON.stringify({
         success: true,
         coins: stats.coins,
@@ -252,16 +241,16 @@ function claimDailyLoginRpc(ctx, logger, nk, _payload) {
 // RPC: spin_wheel
 // ---------------------------------------------------------------------------
 function spinWheelRpc(ctx, logger, nk, payload) {
-    var userId = ctx.userId;
+    const userId = ctx.userId;
     if (!userId)
         throw new Error("Unauthenticated request.");
-    var stats = readPlayerStats(nk, userId);
-    var inventory = readPlayerInventory(nk, userId);
-    var limits = readPlayerDailyLimits(nk, userId);
-    var parsed = payload ? JSON.parse(payload) : {};
-    var isExtraSpin = parsed.is_extra_spin === true;
-    var now = Date.now();
-    var COOLDOWN_MS = 86400000;
+    const stats = readPlayerStats(nk, userId);
+    const inventory = readPlayerInventory(nk, userId);
+    const limits = readPlayerDailyLimits(nk, userId);
+    const parsed = payload ? JSON.parse(payload) : {};
+    const isExtraSpin = parsed.is_extra_spin === true;
+    const now = Date.now();
+    const COOLDOWN_MS = 86400000;
     // 1. Cooldown or token verification
     if (isExtraSpin) {
         if (inventory.spin_tokens <= 0) {
@@ -278,14 +267,14 @@ function spinWheelRpc(ctx, logger, nk, payload) {
     limits.spins_today_count += 1;
     limits.last_spin_timestamp = now;
     // 2. Select Rarity Tier (8 segments 1:1)
-    var roll = Math.random() * 100;
-    var rolledRarity = "Common";
-    var rewardCoins = 0;
-    var rewardXP = 0;
-    var rewardItemType = ""; // "token", "shield", "cosmetic"
-    var rewardItemKey = ""; // "starter", "bronze", "card_back_neon" etc.
-    var displayMessage = "";
-    var segmentIndex = 0;
+    const roll = Math.random() * 100;
+    let rolledRarity = "Common";
+    let rewardCoins = 0;
+    let rewardXP = 0;
+    let rewardItemType = ""; // "token", "shield", "cosmetic"
+    let rewardItemKey = ""; // "starter", "bronze", "card_back_neon" etc.
+    let displayMessage = "";
+    let segmentIndex = 0;
     if (roll < 35) {
         // Segment 0: 50 Coins (Common, 35%)
         rolledRarity = "Common";
@@ -348,16 +337,16 @@ function spinWheelRpc(ctx, logger, nk, payload) {
     }
     // 3. Enforce 800c Daily Spin Soft Cap
     if (rewardCoins > 0 && (limits.spin_coins_today + rewardCoins) > 800) {
-        logger.info("[Economy] Player ".concat(userId, " hit daily spin coin soft cap of 800c. Converting coin reward to XP."));
+        logger.info(`[Economy] Player ${userId} hit daily spin coin soft cap of 800c. Converting coin reward to XP.`);
         rewardCoins = 0;
         rewardXP = 50;
         displayMessage = "50 XP (Soft Cap Conversion)";
     }
     // 4. Enforce Weekly Jackpot Cooldown
     if (rewardCoins >= 1000) {
-        var oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+        const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
         if (limits.last_jackpot_timestamp && (now - limits.last_jackpot_timestamp) < oneWeekMs) {
-            logger.info("[Economy] Player ".concat(userId, " hit jackpot cooldown. Downgrading jackpot."));
+            logger.info(`[Economy] Player ${userId} hit jackpot cooldown. Downgrading jackpot.`);
             rewardCoins = 300;
             displayMessage = "300 Coins (Jackpot Cooldown applied)";
         }
@@ -389,7 +378,7 @@ function spinWheelRpc(ctx, logger, nk, payload) {
     writePlayerStats(nk, userId, stats);
     writePlayerInventory(nk, userId, inventory);
     writePlayerDailyLimits(nk, userId, limits);
-    logger.info("[Economy] Player ".concat(userId, " spun wheel: Segment=").concat(segmentIndex, ", Rarity=").concat(rolledRarity, ", Result=").concat(displayMessage));
+    logger.info(`[Economy] Player ${userId} spun wheel: Segment=${segmentIndex}, Rarity=${rolledRarity}, Result=${displayMessage}`);
     return JSON.stringify({
         success: true,
         rarity: rolledRarity,
@@ -408,24 +397,24 @@ function spinWheelRpc(ctx, logger, nk, payload) {
 // RPC: apply_ad_multiplier
 // ---------------------------------------------------------------------------
 function applyAdMultiplierRpc(ctx, logger, nk, payload) {
-    var userId = ctx.userId;
+    const userId = ctx.userId;
     if (!userId)
         throw new Error("Unauthenticated request.");
-    var parsed = JSON.parse(payload);
-    var rewardType = parsed.reward_type; // "coins" or "tokens"
-    var amount = parsed.amount || 0;
+    const parsed = JSON.parse(payload);
+    const rewardType = parsed.reward_type; // "coins" or "tokens"
+    const amount = parsed.amount || 0;
     if (amount <= 0 || (rewardType !== "coins" && rewardType !== "tokens")) {
         return JSON.stringify({ success: false, error: "Invalid reward type or amount." });
     }
-    var limits = readPlayerDailyLimits(nk, userId);
+    const limits = readPlayerDailyLimits(nk, userId);
     // Enforce 3 rewarded ads daily cap
     if (limits.ad_multipliers_today >= 3) {
         return JSON.stringify({ success: false, error: "Daily ad multiplier limit reached." });
     }
     limits.ad_multipliers_today += 1;
     limits.last_ad_multiplier_timestamp = Date.now();
-    var stats = readPlayerStats(nk, userId);
-    var inventory = readPlayerInventory(nk, userId);
+    const stats = readPlayerStats(nk, userId);
+    const inventory = readPlayerInventory(nk, userId);
     if (rewardType === "coins") {
         // 2x standard multiplier means we award the base amount a second time
         stats.coins += amount;
@@ -437,7 +426,7 @@ function applyAdMultiplierRpc(ctx, logger, nk, payload) {
     writePlayerStats(nk, userId, stats);
     writePlayerInventory(nk, userId, inventory);
     writePlayerDailyLimits(nk, userId, limits);
-    logger.info("[Economy] Ad multiplier applied for player ".concat(userId, ": +").concat(amount, " ").concat(rewardType, "."));
+    logger.info(`[Economy] Ad multiplier applied for player ${userId}: +${amount} ${rewardType}.`);
     return JSON.stringify({
         success: true,
         ad_count: limits.ad_multipliers_today,
@@ -449,31 +438,31 @@ function applyAdMultiplierRpc(ctx, logger, nk, payload) {
 // RPC: start_match
 // ---------------------------------------------------------------------------
 function startMatchRpc(ctx, logger, nk, payload) {
-    var userId = ctx.userId;
+    const userId = ctx.userId;
     if (!userId)
         throw new Error("Unauthenticated request.");
-    var parsed = JSON.parse(payload);
-    var arenaTier = parsed.arena_tier;
-    var entryFee = ARENA_ENTRY_FEES[arenaTier];
+    const parsed = JSON.parse(payload);
+    const arenaTier = parsed.arena_tier;
+    const entryFee = ARENA_ENTRY_FEES[arenaTier];
     if (entryFee === undefined) {
         return JSON.stringify({ success: false, error: "Invalid arena tier." });
     }
-    var stats = readPlayerStats(nk, userId);
+    const stats = readPlayerStats(nk, userId);
     if (stats.coins < entryFee) {
         return JSON.stringify({ success: false, error: "Insufficient coins to enter match." });
     }
     // 1. Resolve any stale active match
-    var activeRead = nk.storageRead([{ collection: "player_active_match", key: "active", userId: userId }]);
+    const activeRead = nk.storageRead([{ collection: "player_active_match", key: "active", userId }]);
     if (activeRead && activeRead.length > 0) {
-        var active = activeRead[0].value;
-        var elapsed = Date.now() - active.start_time;
+        const active = activeRead[0].value;
+        const elapsed = Date.now() - active.start_time;
         if (elapsed < 1800000) {
             // Stale active match is less than 30 minutes old, players cannot multi-match
             return JSON.stringify({ success: false, error: "An active match is already in progress.", match_id: active.match_id });
         }
         else {
             // More than 30 mins old - force resolve it as a loss silently
-            logger.warn("[Economy] Auto-resolving stale match ".concat(active.match_id, " as loss."));
+            logger.warn(`[Economy] Auto-resolving stale match ${active.match_id} as loss.`);
             forceResolveMatchLoss(nk, userId, active.arena_tier, active.entry_fee, logger);
         }
     }
@@ -482,47 +471,47 @@ function startMatchRpc(ctx, logger, nk, payload) {
     writePlayerStats(nk, userId, stats);
     nk.walletUpdate(userId, { coins: -entryFee }, { source: "match_entry", tier: arenaTier });
     // 3. Write active match tracking state
-    var matchId = nk.uuidV4();
+    const matchId = nk.uuidV4();
     nk.storageWrite([{
             collection: "player_active_match",
             key: "active",
-            userId: userId,
+            userId,
             value: { match_id: matchId, arena_tier: arenaTier, entry_fee: entryFee, start_time: Date.now() },
             permissionRead: 1,
             permissionWrite: 0 // Server-only write
         }]);
-    logger.info("[Economy] Match started for player ".concat(userId, ". Match ID: ").concat(matchId, ", Tier: ").concat(arenaTier, ", Fee: ").concat(entryFee));
+    logger.info(`[Economy] Match started for player ${userId}. Match ID: ${matchId}, Tier: ${arenaTier}, Fee: ${entryFee}`);
     return JSON.stringify({ success: true, match_id: matchId });
 }
 // ---------------------------------------------------------------------------
 // RPC: end_match
 // ---------------------------------------------------------------------------
 function endMatchRpc(ctx, logger, nk, payload) {
-    var userId = ctx.userId;
+    const userId = ctx.userId;
     if (!userId)
         throw new Error("Unauthenticated request.");
-    var parsed = JSON.parse(payload);
-    var matchId = parsed.match_id;
-    var won = parsed.won === true;
-    var activeRead = nk.storageRead([{ collection: "player_active_match", key: "active", userId: userId }]);
+    const parsed = JSON.parse(payload);
+    const matchId = parsed.match_id;
+    const won = parsed.won === true;
+    const activeRead = nk.storageRead([{ collection: "player_active_match", key: "active", userId }]);
     if (!activeRead || activeRead.length === 0) {
         return JSON.stringify({ success: false, error: "No active match found for this player." });
     }
-    var activeMatch = activeRead[0].value;
+    const activeMatch = activeRead[0].value;
     if (activeMatch.match_id !== matchId) {
         return JSON.stringify({ success: false, error: "Invalid active match verification." });
     }
-    var arenaTier = activeMatch.arena_tier;
-    var entryFee = activeMatch.entry_fee;
-    var stats = readPlayerStats(nk, userId);
-    var inventory = readPlayerInventory(nk, userId);
-    var shieldConsumed = false;
-    var coinsRefunded = 0;
-    var xpGained = 0;
+    const arenaTier = activeMatch.arena_tier;
+    const entryFee = activeMatch.entry_fee;
+    const stats = readPlayerStats(nk, userId);
+    const inventory = readPlayerInventory(nk, userId);
+    let shieldConsumed = false;
+    let coinsRefunded = 0;
+    let xpGained = 0;
     stats.total_played += 1;
     if (won) {
         // Winner payout (2x entry fee)
-        var payout = entryFee * 2;
+        const payout = entryFee * 2;
         stats.coins += payout;
         stats.wins += 1;
         xpGained = 80; // GDD: +80 XP for winning
@@ -530,7 +519,7 @@ function endMatchRpc(ctx, logger, nk, payload) {
     }
     else {
         // Loss - Check if player has a tier shield
-        var shieldCount = inventory.shields[arenaTier] || 0;
+        const shieldCount = inventory.shields[arenaTier] || 0;
         if (shieldCount > 0) {
             inventory.shields[arenaTier] -= 1;
             shieldConsumed = true;
@@ -544,17 +533,17 @@ function endMatchRpc(ctx, logger, nk, payload) {
         }
     }
     stats.xp += xpGained;
-    var oldLevel = stats.level;
+    const oldLevel = stats.level;
     evaluateLevelUp(stats, inventory, logger);
     // Write updated states
     writePlayerStats(nk, userId, stats);
     writePlayerInventory(nk, userId, inventory);
     // Delete active match token
-    nk.storageDelete([{ collection: "player_active_match", key: "active", userId: userId }]);
-    logger.info("[Economy] Match resolved: MatchId=".concat(matchId, ", Player=").concat(userId, ", Won=").concat(won, ", ShieldConsumed=").concat(shieldConsumed, ", XP Gained=").concat(xpGained));
+    nk.storageDelete([{ collection: "player_active_match", key: "active", userId }]);
+    logger.info(`[Economy] Match resolved: MatchId=${matchId}, Player=${userId}, Won=${won}, ShieldConsumed=${shieldConsumed}, XP Gained=${xpGained}`);
     return JSON.stringify({
         success: true,
-        won: won,
+        won,
         xp_gained: xpGained,
         shield_consumed: shieldConsumed,
         refunded_coins: coinsRefunded,
@@ -567,22 +556,22 @@ function endMatchRpc(ctx, logger, nk, payload) {
 // RPC: get_active_match (for reconnection)
 // ---------------------------------------------------------------------------
 function getActiveMatchRpc(ctx, logger, nk, _payload) {
-    var userId = ctx.userId;
+    const userId = ctx.userId;
     if (!userId)
         throw new Error("Unauthenticated request.");
-    var activeRead = nk.storageRead([{ collection: "player_active_match", key: "active", userId: userId }]);
+    const activeRead = nk.storageRead([{ collection: "player_active_match", key: "active", userId }]);
     if (activeRead && activeRead.length > 0) {
-        var active = activeRead[0].value;
-        var elapsed = Date.now() - active.start_time;
+        const active = activeRead[0].value;
+        const elapsed = Date.now() - active.start_time;
         if (elapsed < 1800000) {
             // Active and not timed out
             return JSON.stringify({ active: true, match_id: active.match_id, arena_tier: active.arena_tier, entry_fee: active.entry_fee, elapsed_ms: elapsed });
         }
         else {
             // Expired - auto resolve as a loss silently
-            logger.warn("[Economy] Auto-resolving expired active match on query: ".concat(active.match_id));
+            logger.warn(`[Economy] Auto-resolving expired active match on query: ${active.match_id}`);
             forceResolveMatchLoss(nk, userId, active.arena_tier, active.entry_fee, logger);
-            nk.storageDelete([{ collection: "player_active_match", key: "active", userId: userId }]);
+            nk.storageDelete([{ collection: "player_active_match", key: "active", userId }]);
         }
     }
     return JSON.stringify({ active: false });
@@ -591,12 +580,12 @@ function getActiveMatchRpc(ctx, logger, nk, _payload) {
 // Private Helpers / Game Mechanics
 // ---------------------------------------------------------------------------
 function forceResolveMatchLoss(nk, userId, arenaTier, entryFee, logger) {
-    var stats = readPlayerStats(nk, userId);
-    var inventory = readPlayerInventory(nk, userId);
+    const stats = readPlayerStats(nk, userId);
+    const inventory = readPlayerInventory(nk, userId);
     stats.total_played += 1;
     stats.xp += 25; // Award loss XP
     // Check if they have a shield
-    var shieldCount = inventory.shields[arenaTier] || 0;
+    const shieldCount = inventory.shields[arenaTier] || 0;
     if (shieldCount > 0) {
         inventory.shields[arenaTier] -= 1;
         stats.coins += entryFee; // Refund entry fee
@@ -608,7 +597,7 @@ function forceResolveMatchLoss(nk, userId, arenaTier, entryFee, logger) {
 }
 function evaluateLevelUp(stats, inventory, logger) {
     // Level threshold calculation
-    var getXpThreshold = function (level) {
+    const getXpThreshold = (level) => {
         if (level <= 10)
             return 200;
         if (level <= 20)
@@ -619,15 +608,15 @@ function evaluateLevelUp(stats, inventory, logger) {
             return 1200;
         return 2000;
     };
-    var currentThreshold = getXpThreshold(stats.level);
+    let currentThreshold = getXpThreshold(stats.level);
     while (stats.xp >= currentThreshold) {
         stats.xp -= currentThreshold;
         stats.level += 1;
         currentThreshold = getXpThreshold(stats.level);
         // Milestone Level Rewards (Coins / Tokens / Cosmetics)
-        var rewardCoins = 0;
-        var unlockedCosmetic = "";
-        var spinTokens = 0;
+        let rewardCoins = 0;
+        let unlockedCosmetic = "";
+        let spinTokens = 0;
         if (stats.level === 3) {
             rewardCoins = 100;
         }
@@ -679,13 +668,13 @@ function evaluateLevelUp(stats, inventory, logger) {
                 inventory.unlocked_cosmetics.push(unlockedCosmetic);
             }
         }
-        logger.info("[Economy] Player leveled up to Level ".concat(stats.level, "! Awarded: ").concat(rewardCoins, "c, Cosmetic: ").concat(unlockedCosmetic));
+        logger.info(`[Economy] Player leveled up to Level ${stats.level}! Awarded: ${rewardCoins}c, Cosmetic: ${unlockedCosmetic}`);
     }
 }
 // ---------------------------------------------------------------------------
 // RPC: buy_cosmetic
 // ---------------------------------------------------------------------------
-var COSMETIC_CATALOGUE = {
+const COSMETIC_CATALOGUE = {
     card_back_neon: 300,
     card_back_retro: 300,
     card_back_animated: 800,
@@ -696,20 +685,20 @@ var COSMETIC_CATALOGUE = {
     emote_pack_1: 400
 };
 function buyCosmeticRpc(ctx, logger, nk, payload) {
-    var userId = ctx.userId;
+    const userId = ctx.userId;
     if (!userId)
         throw new Error("Unauthenticated request.");
-    var parsed = JSON.parse(payload);
-    var cosmeticId = parsed.cosmetic_id;
-    var price = COSMETIC_CATALOGUE[cosmeticId];
+    const parsed = JSON.parse(payload);
+    const cosmeticId = parsed.cosmetic_id;
+    const price = COSMETIC_CATALOGUE[cosmeticId];
     if (!cosmeticId || price === undefined) {
         return JSON.stringify({ success: false, error: "Invalid cosmetic item ID." });
     }
-    var stats = readPlayerStats(nk, userId);
+    const stats = readPlayerStats(nk, userId);
     if (stats.coins < price) {
         return JSON.stringify({ success: false, error: "Insufficient coins." });
     }
-    var inventory = readPlayerInventory(nk, userId);
+    const inventory = readPlayerInventory(nk, userId);
     if (inventory.unlocked_cosmetics.indexOf(cosmeticId) !== -1) {
         return JSON.stringify({ success: false, error: "Cosmetic already owned." });
     }
@@ -718,7 +707,7 @@ function buyCosmeticRpc(ctx, logger, nk, payload) {
     writePlayerStats(nk, userId, stats);
     writePlayerInventory(nk, userId, inventory);
     nk.walletUpdate(userId, { coins: -price }, { source: "buy_cosmetic", item: cosmeticId });
-    logger.info("[Economy] Player ".concat(userId, " purchased cosmetic \"").concat(cosmeticId, "\" for ").concat(price, "c."));
+    logger.info(`[Economy] Player ${userId} purchased cosmetic "${cosmeticId}" for ${price}c.`);
     return JSON.stringify({ success: true, cosmetic_id: cosmeticId, remaining_coins: stats.coins });
 }
 // ---------------------------------------------------------------------------
@@ -727,11 +716,11 @@ function buyCosmeticRpc(ctx, logger, nk, payload) {
 function adCallbackRpc(_ctx, logger, nk, payload) {
     if (!payload)
         throw new Error("Empty payload.");
-    var parsed = JSON.parse(payload);
-    var userId = parsed.user_id;
-    var rewardCoins = parsed.reward_amount || 200;
-    var signature = parsed.signature;
-    var isValid = false;
+    const parsed = JSON.parse(payload);
+    const userId = parsed.user_id;
+    const rewardCoins = parsed.reward_amount || 200;
+    const signature = parsed.signature;
+    let isValid = false;
     if (signature) {
         isValid = true;
     }
@@ -741,38 +730,38 @@ function adCallbackRpc(_ctx, logger, nk, payload) {
     }
     if (!isValid)
         throw new Error("Invalid ad reward signature.");
-    var stats = readPlayerStats(nk, userId);
+    const stats = readPlayerStats(nk, userId);
     stats.coins += rewardCoins;
     writePlayerStats(nk, userId, stats);
     nk.walletUpdate(userId, { coins: rewardCoins }, { source: "ad_reward_callback" });
-    logger.info("[Economy] Ad reward: +".concat(rewardCoins, "c credited to user ").concat(userId, "."));
+    logger.info(`[Economy] Ad reward: +${rewardCoins}c credited to user ${userId}.`);
     return JSON.stringify({ success: true, user_id: userId, new_balance: stats.coins });
 }
 // ---------------------------------------------------------------------------
 // RPC: claim_signup_reward
 // ---------------------------------------------------------------------------
-var SIGNUP_BONUS_COINS = 1000;
+const SIGNUP_BONUS_COINS = 1000;
 function claimSignupRewardRpc(ctx, logger, nk, _payload) {
-    var userId = ctx.userId;
+    const userId = ctx.userId;
     if (!userId)
         throw new Error("Unauthenticated request.");
-    var flagRead = nk.storageRead([{ collection: "player_flags", key: "signup_reward", userId: userId }]);
+    const flagRead = nk.storageRead([{ collection: "player_flags", key: "signup_reward", userId }]);
     if (flagRead && flagRead.length > 0 && flagRead[0].value.claimed === true) {
         return JSON.stringify({ is_new_player: false, reward_coins: 0 });
     }
-    var stats = readPlayerStats(nk, userId);
+    const stats = readPlayerStats(nk, userId);
     stats.coins += SIGNUP_BONUS_COINS;
     writePlayerStats(nk, userId, stats);
     nk.walletUpdate(userId, { coins: SIGNUP_BONUS_COINS }, { source: "signup_reward" });
     nk.storageWrite([{
             collection: "player_flags",
             key: "signup_reward",
-            userId: userId,
+            userId,
             value: { claimed: true, claimed_at: Date.now() },
             permissionRead: 1,
             permissionWrite: 0,
         }]);
-    logger.info("[Economy] Signup bonus of ".concat(SIGNUP_BONUS_COINS, "c granted to new user ").concat(userId, "."));
+    logger.info(`[Economy] Signup bonus of ${SIGNUP_BONUS_COINS}c granted to new user ${userId}.`);
     return JSON.stringify({ is_new_player: true, reward_coins: SIGNUP_BONUS_COINS });
 }
 // ---------------------------------------------------------------------------
