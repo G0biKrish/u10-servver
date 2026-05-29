@@ -3,6 +3,7 @@ const path = require('path');
 
 const authJs = fs.readFileSync(path.join(__dirname, 'auth.js'), 'utf8');
 const economyJs = fs.readFileSync(path.join(__dirname, 'economy.js'), 'utf8');
+const seasonalJs = fs.readFileSync(path.join(__dirname, 'seasonal.js'), 'utf8');
 
 function stripInitModule(content) {
   const marker = 'function InitModule(';
@@ -15,6 +16,7 @@ function stripInitModule(content) {
 
 const cleanAuth = stripInitModule(authJs);
 const cleanEconomy = stripInitModule(economyJs);
+const cleanSeasonal = stripInitModule(seasonalJs);
 
 const combinedInitModule = `
 // ─────────────────────────────────────────────────────────────────────────────
@@ -41,7 +43,14 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("end_match",           endMatchRpc);
   initializer.registerRpc("get_active_match",    getActiveMatchRpc);
 
+  // Seasonal RPCs
+  initializer.registerRpc("get_seasonal_status",    getSeasonalStatusRpc);
+  initializer.registerRpc("claim_seasonal_tier",    claimSeasonalTierRpc);
+  initializer.registerRpc("get_weekly_challenges",  getWeeklyChallengesRpc);
+  initializer.registerRpc("claim_weekly_challenge", claimWeeklyChallengeRpc);
+
   logger.info("[Economy] Economy module loaded successfully.");
+  logger.info("[Seasonal] Seasonal module loaded successfully.");
   logger.info("[Runtime] All U10 modules initialized successfully.");
 }
 `;
@@ -61,6 +70,11 @@ ${cleanAuth}
 // ECONOMY DOMAIN
 // ─────────────────────────────────────────────────────────────────────────────
 ${cleanEconomy}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SEASONAL DOMAIN
+// ─────────────────────────────────────────────────────────────────────────────
+${cleanSeasonal}
 ${combinedInitModule}
 `;
 

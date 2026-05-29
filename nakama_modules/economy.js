@@ -1,4 +1,13 @@
 "use strict";
+// SXP earned per arena mode (seasonal, resets each season)
+const SXP_BY_MODE = {
+    practice: { win: 20,  loss: 8  },
+    bronze:   { win: 60,  loss: 25 },
+    silver:   { win: 90,  loss: 35 },
+    gold:     { win: 130, loss: 50 },
+    diamond:  { win: 180, loss: 65 },
+    sapphire: { win: 240, loss: 85 },
+};
 // =============================================================================
 // U10 — Economy & Rewards Module (TypeScript)
 // =============================================================================
@@ -224,6 +233,9 @@ function claimDailyLoginRpc(ctx, logger, nk, _payload) {
     }
     writePlayerStats(nk, userId, stats);
     writePlayerInventory(nk, userId, inventory);
+    // --- Seasonal XP Grant ---
+    grantSeasonalXP(nk, logger, userId, 25, 'daily_login');
+    updateWeeklyProgress(nk, logger, userId, { daily_claims_this_week: 1 });
     logger.info(`[Economy] Player ${userId} claimed Day Index ${todayIndex} reward: +${coinsGranted}c. ${grantedItemName}`);
     return JSON.stringify({
         success: true,
@@ -378,6 +390,9 @@ function spinWheelRpc(ctx, logger, nk, payload) {
     writePlayerStats(nk, userId, stats);
     writePlayerInventory(nk, userId, inventory);
     writePlayerDailyLimits(nk, userId, limits);
+    // --- Seasonal XP Grant ---
+    grantSeasonalXP(nk, logger, userId, 20, 'spin_wheel');
+    updateWeeklyProgress(nk, logger, userId, { spins_this_week: 1 });
     logger.info(`[Economy] Player ${userId} spun wheel: Segment=${segmentIndex}, Rarity=${rolledRarity}, Result=${displayMessage}`);
     return JSON.stringify({
         success: true,
@@ -540,7 +555,24 @@ function endMatchRpc(ctx, logger, nk, payload) {
     writePlayerInventory(nk, userId, inventory);
     // Delete active match token
     nk.storageDelete([{ collection: "player_active_match", key: "active", userId }]);
-    logger.info(`[Economy] Match resolved: MatchId=${matchId}, Player=${userId}, Won=${won}, ShieldConsumed=${shieldConsumed}, XP Gained=${xpGained}`);
+    // --- Seasonal XP Grant ---
+    const sxpTable = SXP_BY_MODE[arenaTier] || SXP_BY_MODE['bronze'];
+    const sxpGained = won ? sxpTable.win : sxpTable.loss;
+    grantSeasonalXP(nk, logger, userId, sxpGained, `match_${won ? 'win' : 'loss'}_${arenaTier}`);
+    // Update weekly challenge counters
+    const weeklyUpdates = {
+        matches_this_week: 1,
+        match_coins_this_week: won ? (entryFee * 2) : 0,
+    };
+    if (won) {
+        weeklyUpdates.wins_this_week = 1;
+        if (arenaTier === 'gold' || arenaTier === 'diamond' || arenaTier === 'sapphire') {
+            weeklyUpdates.gold_plus_wins_this_week = 1;
+        }
+    }
+    if (arenaTier === 'sapphire') { weeklyUpdates.sapphire_matches_this_week = 1; }
+    updateWeeklyProgress(nk, logger, userId, weeklyUpdates);
+    logger.info(`[Economy] Match resolved: MatchId=${matchId}, Player=${userId}, Won=${won}, ShieldConsumed=${shieldConsumed}, XP Gained=${xpGained}, SXP Gained=${sxpGained}`);
     return JSON.stringify({
         success: true,
         won,
@@ -734,6 +766,9 @@ function adCallbackRpc(_ctx, logger, nk, payload) {
     stats.coins += rewardCoins;
     writePlayerStats(nk, userId, stats);
     nk.walletUpdate(userId, { coins: rewardCoins }, { source: "ad_reward_callback" });
+    // --- Seasonal XP Grant ---
+    grantSeasonalXP(nk, logger, userId, 15, 'ad_watch');
+    updateWeeklyProgress(nk, logger, userId, { ads_this_week: 1 });
     logger.info(`[Economy] Ad reward: +${rewardCoins}c credited to user ${userId}.`);
     return JSON.stringify({ success: true, user_id: userId, new_balance: stats.coins });
 }
