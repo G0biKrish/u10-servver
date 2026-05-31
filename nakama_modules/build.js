@@ -41,6 +41,7 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("buy_cosmetic",        buyCosmeticRpc);
   initializer.registerRpc("ad_callback",         adCallbackRpc);
   initializer.registerRpc("claim_signup_reward", claimSignupRewardRpc);
+  initializer.registerRpc("update_profile",       updateProfileRpc);
 
   // New GDD RPCs
   initializer.registerRpc("apply_ad_multiplier", applyAdMultiplierRpc);

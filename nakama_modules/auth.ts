@@ -164,6 +164,39 @@ function onAfterAuthenticate(
   logger.info(`[Auth] Provisioning complete for user ${userId}.`);
 }
 
+function updateProfileRpc(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  payload: string
+): string {
+  const userId = ctx.userId;
+  if (!userId) {
+    throw new Error("User ID not found in context");
+  }
+
+  let request: { display_name?: string; avatar_url?: string; username?: string };
+  try {
+    request = JSON.parse(payload);
+  } catch (e) {
+    throw new Error("Invalid request payload");
+  }
+
+  const displayName = request.display_name !== undefined ? request.display_name : null;
+  const avatarUrl = request.avatar_url !== undefined ? request.avatar_url : null;
+  const username = request.username !== undefined ? request.username : null;
+
+  try {
+    nk.accountUpdateId(userId, username, displayName, null, null, null, null, avatarUrl);
+    logger.info(`[Auth] Profile updated for user ${userId}. DisplayName: ${displayName}, AvatarUrl: ${avatarUrl}, Username: ${username}`);
+  } catch (e) {
+    logger.error(`[Auth] Failed to update profile for user ${userId}: ${(e as Error).message}`);
+    throw e;
+  }
+
+  return JSON.stringify({ success: true });
+}
+
 // ---------------------------------------------------------------------------
 // Module entry point — registers only auth-domain hooks
 // ---------------------------------------------------------------------------
@@ -176,6 +209,7 @@ function InitModule(
 ): void {
   initializer.registerAfterAuthenticateDevice(onAfterAuthenticate);
   initializer.registerAfterAuthenticateGoogle(onAfterAuthenticate);
+  initializer.registerRpc("update_profile", updateProfileRpc);
 
   logger.info("[Auth] Auth module loaded successfully.");
 }

@@ -1264,6 +1264,31 @@ function onAfterAuthenticate(ctx, logger, nk, out, _request) {
     }
     logger.info(`[Auth] Provisioning complete for user ${userId}.`);
 }
+function updateProfileRpc(ctx, logger, nk, payload) {
+    const userId = ctx.userId;
+    if (!userId) {
+        throw new Error("User ID not found in context");
+    }
+    let request;
+    try {
+        request = JSON.parse(payload);
+    }
+    catch (e) {
+        throw new Error("Invalid request payload");
+    }
+    const displayName = request.display_name !== undefined ? request.display_name : null;
+    const avatarUrl = request.avatar_url !== undefined ? request.avatar_url : null;
+    const username = request.username !== undefined ? request.username : null;
+    try {
+        nk.accountUpdateId(userId, username, displayName, null, null, null, null, avatarUrl);
+        logger.info(`[Auth] Profile updated for user ${userId}. DisplayName: ${displayName}, AvatarUrl: ${avatarUrl}, Username: ${username}`);
+    }
+    catch (e) {
+        logger.error(`[Auth] Failed to update profile for user ${userId}: ${e.message}`);
+        throw e;
+    }
+    return JSON.stringify({ success: true });
+}
 // ---------------------------------------------------------------------------
 // Module entry point — registers only auth-domain hooks
 // ---------------------------------------------------------------------------
@@ -3205,6 +3230,7 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("buy_cosmetic",        buyCosmeticRpc);
   initializer.registerRpc("ad_callback",         adCallbackRpc);
   initializer.registerRpc("claim_signup_reward", claimSignupRewardRpc);
+  initializer.registerRpc("update_profile",       updateProfileRpc);
 
   // New GDD RPCs
   initializer.registerRpc("apply_ad_multiplier", applyAdMultiplierRpc);
