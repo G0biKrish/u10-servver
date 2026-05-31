@@ -110,22 +110,72 @@ const CHALLENGE_CATEGORIES = ["match_win", "match_count", "streak", "economy", "
 // Storage Helpers
 // ---------------------------------------------------------------------------
 
-function getActiveSeason(now: number): typeof SEASONS[0] | null {
-  for (const s of SEASONS) {
+interface SeasonalConfig {
+  seasons: Array<{
+    season_id: string;
+    start: number;
+    end: number;
+    tiers?: TierDef[];
+    challenges?: ChallengeDef[];
+  }>;
+  tiers?: TierDef[];
+  challenges?: ChallengeDef[];
+}
+
+function getSeasonalConfig(nk: nkruntime.Nakama): SeasonalConfig {
+  const collection = "system_config";
+  const key = "seasonal_rewards";
+  const systemUserId = "00000000-0000-0000-0000-000000000000";
+  
+  try {
+    const result = nk.storageRead([{ collection, key, userId: systemUserId }]);
+    if (result && result.length > 0) {
+      return result[0].value as SeasonalConfig;
+    }
+  } catch (e) {
+    // Fall back to defaults
+  }
+  
+  const defaults: SeasonalConfig = {
+    seasons: SEASONS,
+    tiers: SEASON_TIERS,
+    challenges: CHALLENGE_POOL
+  };
+  
+  try {
+    nk.storageWrite([{
+      collection,
+      key,
+      userId: systemUserId,
+      value: defaults,
+      permissionRead: 2, // Public Read
+      permissionWrite: 0, // Server Write Only
+    }]);
+  } catch (e) {
+    // Ignore
+  }
+  
+  return defaults;
+}
+
+function getActiveSeason(nk: nkruntime.Nakama, now: number): typeof SEASONS[0] | null {
+  const config = getSeasonalConfig(nk);
+  for (const s of config.seasons) {
     if (now >= s.start && now < s.end) return s;
   }
   return null;
 }
 
-function getNextSeason(now: number): typeof SEASONS[0] | null {
-  for (const s of SEASONS) {
+function getNextSeason(nk: nkruntime.Nakama, now: number): typeof SEASONS[0] | null {
+  const config = getSeasonalConfig(nk);
+  for (const s of config.seasons) {
     if (s.start > now) return s;
   }
   return null;
 }
 
-function isOffSeason(now: number): boolean {
-  return getActiveSeason(now) === null;
+function isOffSeason(nk: nkruntime.Nakama, now: number): boolean {
+  return getActiveSeason(nk, now) === null;
 }
 
 function getSeasonalProgress(nk: nkruntime.Nakama, userId: string, seasonId: string): any {
@@ -171,19 +221,24 @@ function getISOWeekNumber(date: Date): number {
   return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 }
 
-function pickWeeklyChallenges(weekNumber: number): ChallengeDef[] {
-  // Deterministic pick — use weekNumber as seed offset so it's the same for all players
+function pickWeeklyChallenges(nk: nkruntime.Nakama, weekNumber: number, seasonId?: string): ChallengeDef[] {
+  const config = getSeasonalConfig(nk);
+  const targetId = seasonId || getActiveSeason(nk, Date.now())?.season_id;
+  const seasonObj = config.seasons.find(s => s.season_id === targetId);
+  const challengesPool = (seasonObj && seasonObj.challenges) ? seasonObj.challenges : (config.challenges || CHALLENGE_POOL);
+
   const picked: ChallengeDef[] = [];
   for (const cat of CHALLENGE_CATEGORIES) {
-    const pool = CHALLENGE_POOL.filter(c => c.category === cat);
+    const pool = challengesPool.filter(c => c.category === cat);
+    if (pool.length === 0) continue;
     const idx = weekNumber % pool.length;
     picked.push(pool[idx]);
   }
   return picked;
 }
 
-function initWeeklyChallenges(weekNumber: number): any {
-  const challenges = pickWeeklyChallenges(weekNumber);
+function initWeeklyChallenges(nk: nkruntime.Nakama, weekNumber: number, seasonId?: string): any {
+  const challenges = pickWeeklyChallenges(nk, weekNumber, seasonId);
   return {
     week_number: weekNumber,
     challenges: challenges.map(c => ({
@@ -225,9 +280,14 @@ function syncChallengeProgress(weeklyState: any): any {
 // SXP Tier Recalculation
 // ---------------------------------------------------------------------------
 
-function recalculateTier(sxp: number): number {
+function recalculateTier(nk: nkruntime.Nakama, sxp: number, seasonId?: string): number {
   let highestTier = 0;
-  for (const td of SEASON_TIERS) {
+  const config = getSeasonalConfig(nk);
+  const targetId = seasonId || getActiveSeason(nk, Date.now())?.season_id;
+  const seasonObj = config.seasons.find(s => s.season_id === targetId);
+  const tiersList = (seasonObj && seasonObj.tiers) ? seasonObj.tiers : (config.tiers || SEASON_TIERS);
+
+  for (const td of tiersList) {
     if (sxp >= td.sxp_required) {
       highestTier = td.tier;
     } else {
@@ -244,9 +304,9 @@ function recalculateTier(sxp: number): number {
 
 function grantSeasonalXP(nk: nkruntime.Nakama, logger: nkruntime.Logger, userId: string, sxpAmount: number, source: string): void {
   const now = Date.now();
-  const activeSeason = getActiveSeason(now);
+  const activeSeason = getActiveSeason(nk, now);
   if (!activeSeason) {
-    logger.debug(`[Seasonal] SXP grant skipped — off-season. Source: ${source}`);
+    logger.info(`[Seasonal] SXP grant skipped — off-season. Source: ${source}`);
     return;
   }
 
@@ -255,14 +315,14 @@ function grantSeasonalXP(nk: nkruntime.Nakama, logger: nkruntime.Logger, userId:
   // Ensure weekly challenges are initialised / rolled over
   const weekNumber = getISOWeekNumber(new Date(now));
   if (!progress.weekly_challenges || progress.weekly_challenges.week_number !== weekNumber) {
-    progress.weekly_challenges = initWeeklyChallenges(weekNumber);
+    progress.weekly_challenges = initWeeklyChallenges(nk, weekNumber, activeSeason.season_id);
   }
 
   // Grant SXP
   progress.seasonal_xp += sxpAmount;
 
   // Recalculate highest tier reached
-  const newTier = recalculateTier(progress.seasonal_xp);
+  const newTier = recalculateTier(nk, progress.seasonal_xp, activeSeason.season_id);
   if (newTier > progress.current_tier) {
     progress.current_tier = newTier;
     logger.info(`[Seasonal] Player ${userId} reached Tier ${newTier}! SXP: ${progress.seasonal_xp}`);
@@ -280,50 +340,96 @@ function getSeasonalStatusRpc(
   ctx: nkruntime.Context,
   logger: nkruntime.Logger,
   nk: nkruntime.Nakama,
-  _payload: string
+  payload: string
 ): string {
   const userId = ctx.userId;
   if (!userId) throw new Error("Unauthenticated request.");
 
   const now = Date.now();
-  const activeSeason = getActiveSeason(now);
-  const nextSeason = getNextSeason(now);
+  const activeSeason = getActiveSeason(nk, now);
+  const nextSeason = getNextSeason(nk, now);
 
-  if (!activeSeason) {
-    // Off-season response
-    return JSON.stringify({
-      success: true,
-      season_active: false,
-      next_season_id: nextSeason?.season_id ?? null,
-      next_season_start: nextSeason?.start ?? null,
-      season_tiers: SEASON_TIERS,
-    });
+  const config = getSeasonalConfig(nk);
+
+  // Available seasons are those that have already started (now >= s.start)
+  const availableSeasons = config.seasons.filter(s => now >= s.start).map(s => ({
+    season_id: s.season_id,
+    start: s.start,
+    end: s.end,
+    is_active: now >= s.start && now < s.end
+  }));
+
+  let requestedSeasonId: string | null = null;
+  if (payload) {
+    try {
+      const parsed = JSON.parse(payload);
+      if (parsed && parsed.season_id) {
+        requestedSeasonId = parsed.season_id;
+      }
+    } catch (e) {
+      // Ignored, fallback to default
+    }
   }
 
-  const progress = getSeasonalProgress(nk, userId, activeSeason.season_id);
+  // Security check: if requesting a specific season, make sure it has already started
+  if (requestedSeasonId) {
+    const isStarted = availableSeasons.some(s => s.season_id === requestedSeasonId);
+    if (!isStarted) {
+      return JSON.stringify({ success: false, error: "Season is locked or does not exist." });
+    }
+  }
 
-  // Sync weekly challenges
-  const weekNumber = getISOWeekNumber(new Date(now));
-  if (!progress.weekly_challenges || progress.weekly_challenges.week_number !== weekNumber) {
-    progress.weekly_challenges = initWeeklyChallenges(weekNumber);
-    writeSeasonalProgress(nk, userId, activeSeason.season_id, progress);
+  // Determine target season
+  let targetSeason: { season_id: string; start: number; end: number; tiers?: TierDef[] } | null = null;
+  if (requestedSeasonId) {
+    targetSeason = config.seasons.find(s => s.season_id === requestedSeasonId) || null;
   } else {
-    progress.weekly_challenges = syncChallengeProgress(progress.weekly_challenges);
+    // Default to active season, or the latest available season, or null
+    if (activeSeason) {
+      targetSeason = activeSeason;
+    } else if (availableSeasons.length > 0) {
+      const latestId = availableSeasons[availableSeasons.length - 1].season_id;
+      targetSeason = config.seasons.find(s => s.season_id === latestId) || null;
+    }
   }
+
+  let progress: any = null;
+  if (targetSeason) {
+    progress = getSeasonalProgress(nk, userId, targetSeason.season_id);
+
+    // Sync weekly challenges only for the active season
+    if (activeSeason && targetSeason.season_id === activeSeason.season_id) {
+      const weekNumber = getISOWeekNumber(new Date(now));
+      if (!progress.weekly_challenges || progress.weekly_challenges.week_number !== weekNumber) {
+        progress.weekly_challenges = initWeeklyChallenges(nk, weekNumber, activeSeason.season_id);
+        writeSeasonalProgress(nk, userId, activeSeason.season_id, progress);
+      } else {
+        progress.weekly_challenges = syncChallengeProgress(progress.weekly_challenges);
+      }
+    }
+  }
+
+  const targetSeasonTiers = (targetSeason && targetSeason.tiers) ? targetSeason.tiers : (config.tiers || SEASON_TIERS);
 
   return JSON.stringify({
     success: true,
-    season_active: true,
-    season_id: activeSeason.season_id,
-    season_start: activeSeason.start,
-    season_end: activeSeason.end,
-    seasonal_xp: progress.seasonal_xp,
-    current_tier: progress.current_tier,   // Highest tier reached (SXP threshold crossed)
-    tiers_claimed: progress.tiers_claimed,
-    season_master: progress.season_master,
-    weekly_challenges: progress.weekly_challenges,
-    season_tiers: SEASON_TIERS,
-    time_remaining_ms: activeSeason.end - now,
+    season_active: activeSeason !== null,
+    active_season_id: activeSeason?.season_id ?? null,
+    next_season_id: nextSeason?.season_id ?? null,
+    next_season_start: nextSeason?.start ?? null,
+    available_seasons: availableSeasons,
+
+    // Selected/Target Season details
+    season_id: targetSeason?.season_id ?? null,
+    season_start: targetSeason?.start ?? null,
+    season_end: targetSeason?.end ?? null,
+    seasonal_xp: progress ? progress.seasonal_xp : 0,
+    current_tier: progress ? progress.current_tier : 0,
+    tiers_claimed: progress ? progress.tiers_claimed : new Array(20).fill(false),
+    season_master: progress ? progress.season_master : false,
+    weekly_challenges: progress ? progress.weekly_challenges : null,
+    season_tiers: targetSeasonTiers,
+    time_remaining_ms: targetSeason ? (targetSeason.end - now) : 0,
   });
 }
 
@@ -341,7 +447,7 @@ function claimSeasonalTierRpc(
   if (!userId) throw new Error("Unauthenticated request.");
 
   const now = Date.now();
-  const activeSeason = getActiveSeason(now);
+  const activeSeason = getActiveSeason(nk, now);
   if (!activeSeason) {
     return JSON.stringify({ success: false, error: "No active season." });
   }
@@ -352,7 +458,11 @@ function claimSeasonalTierRpc(
     return JSON.stringify({ success: false, error: "Invalid tier number." });
   }
 
-  const tierDef = SEASON_TIERS.find(t => t.tier === tierNumber);
+  const config = getSeasonalConfig(nk);
+  const activeSeasonObj = config.seasons.find(s => s.season_id === activeSeason.season_id);
+  const tiersList = (activeSeasonObj && activeSeasonObj.tiers) ? activeSeasonObj.tiers : (config.tiers || SEASON_TIERS);
+  const tierDef = tiersList.find(t => t.tier === tierNumber);
+  
   if (!tierDef) {
     return JSON.stringify({ success: false, error: "Tier definition not found." });
   }
@@ -462,7 +572,7 @@ function getWeeklyChallengesRpc(
   if (!userId) throw new Error("Unauthenticated request.");
 
   const now = Date.now();
-  const activeSeason = getActiveSeason(now);
+  const activeSeason = getActiveSeason(nk, now);
   if (!activeSeason) {
     return JSON.stringify({ success: false, error: "No active season." });
   }
@@ -471,7 +581,7 @@ function getWeeklyChallengesRpc(
   const weekNumber = getISOWeekNumber(new Date(now));
 
   if (!progress.weekly_challenges || progress.weekly_challenges.week_number !== weekNumber) {
-    progress.weekly_challenges = initWeeklyChallenges(weekNumber);
+    progress.weekly_challenges = initWeeklyChallenges(nk, weekNumber, activeSeason.season_id);
     writeSeasonalProgress(nk, userId, activeSeason.season_id, progress);
   } else {
     progress.weekly_challenges = syncChallengeProgress(progress.weekly_challenges);
@@ -498,7 +608,7 @@ function claimWeeklyChallengeRpc(
   if (!userId) throw new Error("Unauthenticated request.");
 
   const now = Date.now();
-  const activeSeason = getActiveSeason(now);
+  const activeSeason = getActiveSeason(nk, now);
   if (!activeSeason) {
     return JSON.stringify({ success: false, error: "No active season." });
   }
@@ -531,7 +641,7 @@ function claimWeeklyChallengeRpc(
 
   // Grant SXP reward
   progress.seasonal_xp += challenge.sxp_reward;
-  const newTier = recalculateTier(progress.seasonal_xp);
+  const newTier = recalculateTier(nk, progress.seasonal_xp, activeSeason.season_id);
   if (newTier > progress.current_tier) {
     progress.current_tier = newTier;
   }
@@ -561,14 +671,14 @@ function updateWeeklyProgress(
   updates: { [key: string]: number }
 ): void {
   const now = Date.now();
-  const activeSeason = getActiveSeason(now);
+  const activeSeason = getActiveSeason(nk, now);
   if (!activeSeason) return;
 
   const progress = getSeasonalProgress(nk, userId, activeSeason.season_id);
   const weekNumber = getISOWeekNumber(new Date(now));
 
   if (!progress.weekly_challenges || progress.weekly_challenges.week_number !== weekNumber) {
-    progress.weekly_challenges = initWeeklyChallenges(weekNumber);
+    progress.weekly_challenges = initWeeklyChallenges(nk, weekNumber, activeSeason.season_id);
   }
 
   // Apply increments
@@ -585,6 +695,59 @@ function updateWeeklyProgress(
 }
 
 // ---------------------------------------------------------------------------
+// RPC: update_seasonal_config (Admin / Developer Config Utility)
+// ---------------------------------------------------------------------------
+
+function updateSeasonalConfigRpc(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  payload: string
+): string {
+  try {
+    const parsed = payload ? JSON.parse(payload) : null;
+    if (!parsed || !parsed.seasons) {
+      return JSON.stringify({ success: false, error: "Invalid payload: missing seasons." });
+    }
+
+    // Identify deleted seasons to clean up related progress entries
+    const oldConfig = getSeasonalConfig(nk);
+    if (oldConfig && oldConfig.seasons) {
+      const newSeasonIds = new Set(parsed.seasons.map((s: any) => s.season_id));
+      const deletedSeasonIds = oldConfig.seasons
+        .map(s => s.season_id)
+        .filter(id => !newSeasonIds.has(id));
+
+      for (const id of deletedSeasonIds) {
+        logger.info(`[Seasonal] Season '${id}' was deleted from config. Cleaning up player seasonal progress...`);
+        try {
+          const query = "DELETE FROM storage WHERE collection = 'player_seasonal' AND key = $1";
+          (nk as any).sqlExec(query, [id]);
+          logger.info(`[Seasonal] Successfully deleted all player_seasonal progress records for key: ${id}`);
+        } catch (err) {
+          logger.error(`[Seasonal] Failed to clean up database records for deleted season ${id}: ${(err as Error).message}`);
+        }
+      }
+    }
+
+    nk.storageWrite([{
+      collection: "system_config",
+      key: "seasonal_rewards",
+      userId: "00000000-0000-0000-0000-000000000000",
+      value: parsed,
+      permissionRead: 2, // Public Read
+      permissionWrite: 0, // Server Write Only
+    }]);
+
+    logger.info("[Seasonal] Dynamic seasonal config updated via admin RPC.");
+    return JSON.stringify({ success: true });
+  } catch (e) {
+    logger.error(`[Seasonal] Failed to update seasonal config: ${(e as Error).message}`);
+    return JSON.stringify({ success: false, error: (e as Error).message });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Module entry point
 // ---------------------------------------------------------------------------
 
@@ -598,5 +761,6 @@ function InitModule(
   initializer.registerRpc("claim_seasonal_tier",   claimSeasonalTierRpc);
   initializer.registerRpc("get_weekly_challenges", getWeeklyChallengesRpc);
   initializer.registerRpc("claim_weekly_challenge",claimWeeklyChallengeRpc);
+  initializer.registerRpc("update_seasonal_config",updateSeasonalConfigRpc);
   logger.info("[Seasonal] Seasonal module loaded successfully.");
 }

@@ -4,6 +4,7 @@ const path = require('path');
 const authJs = fs.readFileSync(path.join(__dirname, 'auth.js'), 'utf8');
 const economyJs = fs.readFileSync(path.join(__dirname, 'economy.js'), 'utf8');
 const seasonalJs = fs.readFileSync(path.join(__dirname, 'seasonal.js'), 'utf8');
+const legalJs = fs.readFileSync(path.join(__dirname, 'legal_defaults.js'), 'utf8');
 
 function stripInitModule(content) {
   const marker = 'function InitModule(';
@@ -24,6 +25,10 @@ const combinedInitModule = `
 // ─────────────────────────────────────────────────────────────────────────────
 
 function InitModule(ctx, logger, nk, initializer) {
+  // Initialize system configuration settings & achievements
+  initializeSystemConfig(nk, logger);
+  initializeAchievementsConfig(nk, logger);
+
   // Auth Module hooks
   initializer.registerAfterAuthenticateDevice(onAfterAuthenticate);
   initializer.registerAfterAuthenticateGoogle(onAfterAuthenticate);
@@ -42,12 +47,18 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("start_match",         startMatchRpc);
   initializer.registerRpc("end_match",           endMatchRpc);
   initializer.registerRpc("get_active_match",    getActiveMatchRpc);
+  initializer.registerRpc("get_achievements_status", getAchievementsStatusRpc);
+  initializer.registerRpc("get_match_history",    getMatchHistoryRpc);
+  initializer.registerRpc("update_achievements_config", updateAchievementsConfigRpc);
+  initializer.registerRpc("update_system_settings_config", updateSystemSettingsConfigRpc);
 
   // Seasonal RPCs
   initializer.registerRpc("get_seasonal_status",    getSeasonalStatusRpc);
   initializer.registerRpc("claim_seasonal_tier",    claimSeasonalTierRpc);
   initializer.registerRpc("get_weekly_challenges",  getWeeklyChallengesRpc);
   initializer.registerRpc("claim_weekly_challenge", claimWeeklyChallengeRpc);
+  initializer.registerRpc("update_seasonal_config", updateSeasonalConfigRpc);
+
 
   logger.info("[Economy] Economy module loaded successfully.");
   logger.info("[Seasonal] Seasonal module loaded successfully.");
@@ -60,6 +71,11 @@ const result = `// =============================================================
 // =============================================================================
 // Generated dynamically by build.js
 // =============================================================================
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LEGAL DEFAULTS
+// ─────────────────────────────────────────────────────────────────────────────
+${legalJs}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AUTH DOMAIN

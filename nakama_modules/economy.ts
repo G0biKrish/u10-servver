@@ -39,6 +39,9 @@ function readPlayerStats(nk: nkruntime.Nakama, userId: string): any {
     weekly_claims: [false, false, false, false, false, false, false],
     week_number: 0,
     week_year: 0,
+    // Seasonal bonus tracking
+    last_first_match_date: 0,  // UTC timestamp (ms) of last first-match-of-day bonus
+    current_win_streak: 0,     // Live win streak — resets on any loss
   };
   const result = nk.storageRead([{ collection: "player_stats", key: "stats", userId }]);
   return (result && result.length > 0) ? { ...defaults, ...result[0].value } : defaults;
@@ -84,7 +87,9 @@ function readPlayerDailyLimits(nk: nkruntime.Nakama, userId: string): any {
     ad_multipliers_today: 0,
     last_spin_timestamp: 0,
     last_jackpot_timestamp: 0,
-    last_ad_multiplier_timestamp: 0
+    last_ad_multiplier_timestamp: 0,
+    paid_spins_today: 0,
+    ad_spins_today: 0
   };
   const result = nk.storageRead([{ collection: "player_daily_limits", key: "limits", userId }]);
   if (result && result.length > 0) {
@@ -98,6 +103,8 @@ function readPlayerDailyLimits(nk: nkruntime.Nakama, userId: string): any {
       data.spins_today_count = 0;
       data.spin_coins_today = 0;
       data.ad_multipliers_today = 0;
+      data.paid_spins_today = 0;
+      data.ad_spins_today = 0;
     }
     return { ...defaults, ...data };
   }
@@ -297,12 +304,36 @@ function spinWheelRpc(
   const now = Date.now();
   const COOLDOWN_MS = 86_400_000;
 
-  // 1. Cooldown or token verification
-  if (isExtraSpin) {
-    if (inventory.spin_tokens <= 0) {
-      return JSON.stringify({ success: false, error: "No spin tokens available." });
+  // 1. Cooldown or token verification / cost deduction
+  const useAd: boolean = parsed.use_ad === true;
+  let cost = 0;
+
+  if (useAd) {
+    limits.ad_spins_today = (limits.ad_spins_today || 0) + 1;
+  } else if (isExtraSpin) {
+    if (inventory.spin_tokens > 0) {
+      inventory.spin_tokens -= 1;
+    } else {
+      // Paid extra spin
+      const paidCount = limits.paid_spins_today || 0;
+      if (paidCount === 0) {
+        cost = 250;
+      } else if (paidCount === 1) {
+        cost = 350;
+      } else if (paidCount === 2) {
+        cost = 420;
+      } else {
+        cost = 500 + (paidCount - 3) * 100;
+      }
+
+      if (stats.coins < cost) {
+        return JSON.stringify({ success: false, error: "Insufficient coins for extra spin." });
+      }
+
+      stats.coins -= cost;
+      limits.paid_spins_today = paidCount + 1;
+      nk.walletUpdate(userId, { coins: -cost }, { source: "spin_wheel_paid", cost });
     }
-    inventory.spin_tokens -= 1;
   } else {
     if (stats.last_wheel_spin && (now - stats.last_wheel_spin) < COOLDOWN_MS) {
       return JSON.stringify({ success: false, error: "Free daily spin is on cooldown." });
@@ -435,7 +466,9 @@ function spinWheelRpc(
     display_message: displayMessage,
     total_coins: stats.coins,
     spin_tokens: inventory.spin_tokens,
-    spins_today: limits.spins_today_count
+    spins_today: limits.spins_today_count,
+    paid_spins_today: limits.paid_spins_today,
+    ad_spins_today: limits.ad_spins_today
   });
 }
 
@@ -509,14 +542,19 @@ function startMatchRpc(
 
   const parsed = JSON.parse(payload);
   const arenaTier: string = parsed.arena_tier;
-  const entryFee = ARENA_ENTRY_FEES[arenaTier];
+  const isPrivate: boolean = parsed.is_private === true;
+  let entryFee = ARENA_ENTRY_FEES[arenaTier];
 
   if (entryFee === undefined) {
     return JSON.stringify({ success: false, error: "Invalid arena tier." });
   }
 
   const stats = readPlayerStats(nk, userId);
-  if (stats.coins < entryFee) {
+
+  // If match is private and host level >= 500, match is free to host/join
+  const effectiveEntryFee = (isPrivate && stats.level >= 500) ? 0 : entryFee;
+
+  if (stats.coins < effectiveEntryFee) {
     return JSON.stringify({ success: false, error: "Insufficient coins to enter match." });
   }
 
@@ -535,10 +573,12 @@ function startMatchRpc(
     }
   }
 
-  // 2. Deduct entry fee
-  stats.coins -= entryFee;
-  writePlayerStats(nk, userId, stats);
-  nk.walletUpdate(userId, { coins: -entryFee }, { source: "match_entry", tier: arenaTier });
+  // 2. Deduct entry fee if > 0
+  if (effectiveEntryFee > 0) {
+    stats.coins -= effectiveEntryFee;
+    writePlayerStats(nk, userId, stats);
+    nk.walletUpdate(userId, { coins: -effectiveEntryFee }, { source: "match_entry", tier: arenaTier });
+  }
 
   // 3. Write active match tracking state
   const matchId = nk.uuidV4();
@@ -546,12 +586,12 @@ function startMatchRpc(
     collection: "player_active_match",
     key: "active",
     userId,
-    value: { match_id: matchId, arena_tier: arenaTier, entry_fee: entryFee, start_time: Date.now() },
+    value: { match_id: matchId, arena_tier: arenaTier, entry_fee: effectiveEntryFee, start_time: Date.now(), is_private: isPrivate },
     permissionRead: 1,
     permissionWrite: 0 // Server-only write
   }]);
 
-  logger.info(`[Economy] Match started for player ${userId}. Match ID: ${matchId}, Tier: ${arenaTier}, Fee: ${entryFee}`);
+  logger.info(`[Economy] Match started for player ${userId}. Match ID: ${matchId}, Tier: ${arenaTier}, Fee: ${effectiveEntryFee}, Private: ${isPrivate}`);
   return JSON.stringify({ success: true, match_id: matchId });
 }
 
@@ -587,22 +627,26 @@ function endMatchRpc(
 
   const stats = readPlayerStats(nk, userId);
   const inventory = readPlayerInventory(nk, userId);
+  const isPrivate = activeMatch.is_private === true;
   let shieldConsumed = false;
   let coinsRefunded = 0;
   let xpGained = 0;
 
   stats.total_played += 1;
 
+  let payout = 0;
   if (won) {
     // Winner payout (2x entry fee)
-    const payout = entryFee * 2;
+    payout = entryFee * 2;
     stats.coins += payout;
     stats.wins += 1;
     xpGained = 80; // GDD: +80 XP for winning
-    nk.walletUpdate(userId, { coins: payout }, { source: "match_win", match_id: matchId });
+    if (payout > 0) {
+      nk.walletUpdate(userId, { coins: payout }, { source: "match_win", match_id: matchId });
+    }
   } else {
-    // Loss - Check if player has a tier shield
-    const shieldCount = inventory.shields[arenaTier] || 0;
+    // Loss - Check if player has a tier shield (only if not practice/private with 0 entry fee)
+    const shieldCount = entryFee > 0 ? (inventory.shields[arenaTier] || 0) : 0;
     if (shieldCount > 0) {
       inventory.shields[arenaTier] -= 1;
       shieldConsumed = true;
@@ -626,16 +670,114 @@ function endMatchRpc(
   // Delete active match token
   nk.storageDelete([{ collection: "player_active_match", key: "active", userId }]);
 
-  logger.info(`[Economy] Match resolved: MatchId=${matchId}, Player=${userId}, Won=${won}, ShieldConsumed=${shieldConsumed}, XP Gained=${xpGained}`);
+  // --- Seasonal XP Grant ---
+  const sxpTable = (SXP_BY_MODE as any)[arenaTier] || (SXP_BY_MODE as any)['bronze'];
+  let sxpGained: number = won ? sxpTable.win : sxpTable.loss;
+
+  // ── First Match of Day Bonus (+50 SXP, non-practice only) ──────────────────
+  let firstMatchBonus = 0;
+  if (arenaTier !== 'practice' && !isPrivate) {
+    const nowMs = Date.now();
+    const todayUTCMidnight = new Date();
+    todayUTCMidnight.setUTCHours(0, 0, 0, 0);
+    const lastDate = new Date(stats.last_first_match_date || 0);
+    lastDate.setUTCHours(0, 0, 0, 0);
+    if (lastDate.getTime() < todayUTCMidnight.getTime()) {
+      firstMatchBonus = 50;
+      stats.last_first_match_date = nowMs;
+      logger.info(`[Economy] First match of day bonus: +50 SXP for player ${userId}`);
+    }
+  }
+
+  // ── Win-Streak Bonus (+40 SXP every 3rd consecutive win) ───────────────────
+  let streakBonus = 0;
+  if (won) {
+    stats.current_win_streak = (stats.current_win_streak || 0) + 1;
+    if (stats.current_win_streak > (stats.best_streak || 0)) {
+      stats.best_streak = stats.current_win_streak;
+    }
+    if (stats.current_win_streak % 3 === 0) {
+      streakBonus = 40;
+      logger.info(`[Economy] Win streak bonus: +40 SXP for player ${userId} (streak: ${stats.current_win_streak})`);
+    }
+  } else {
+    stats.current_win_streak = 0;
+  }
+
+  sxpGained += firstMatchBonus + streakBonus;
+  grantSeasonalXP(nk, logger, userId, sxpGained, `match_${won ? 'win' : 'loss'}_${arenaTier}`);
+
+  // Rank Progression LP calculation (ranked matches only - non-practice and non-private)
+  let lpDelta = 0;
+  if (!isPrivate && arenaTier !== 'practice') {
+    const currentTier = stats.tier || "Bronze";
+    if (won) {
+      if (currentTier === "Bronze" || currentTier === "Silver") {
+        lpDelta = 25;
+      } else if (currentTier === "Gold" || currentTier === "Platinum") {
+        lpDelta = 20;
+      } else if (currentTier === "Elite" || currentTier === "Master") {
+        lpDelta = 15;
+      } else { // Prestige
+        lpDelta = 10;
+      }
+      stats.lp = (stats.lp || 0) + lpDelta;
+    } else {
+      if (currentTier === "Bronze" || currentTier === "Silver") {
+        lpDelta = -10;
+      } else if (currentTier === "Gold" || currentTier === "Platinum") {
+        lpDelta = -15;
+      } else if (currentTier === "Elite" || currentTier === "Master") {
+        lpDelta = -18;
+      } else { // Prestige
+        lpDelta = -20;
+      }
+      stats.lp = Math.max(0, (stats.lp || 0) + lpDelta);
+    }
+    stats.tier = calculateTier(stats.lp);
+  }
+
+  // Update weekly challenge counters
+  const weeklyUpdates: Record<string, number> = {
+    matches_this_week: 1,
+    match_coins_this_week: won ? (entryFee * 2) : 0,
+    best_streak_this_week: stats.current_win_streak,
+  };
+  if (won) {
+    weeklyUpdates.wins_this_week = 1;
+    if (arenaTier === 'gold' || arenaTier === 'diamond' || arenaTier === 'sapphire') {
+      weeklyUpdates.gold_plus_wins_this_week = 1;
+    }
+  }
+  if (arenaTier === 'sapphire') { weeklyUpdates.sapphire_matches_this_week = 1; }
+  updateWeeklyProgress(nk, logger, userId, weeklyUpdates);
+
+  // Write Match History Record
+  const coinsGained = won ? payout : (shieldConsumed ? entryFee : 0);
+  writeMatchHistoryRecord(nk, userId, matchId, arenaTier, won, lpDelta, coinsGained, isPrivate);
+
+  // Evaluate & Update achievements progression
+  updateAchievementsProgress(nk, logger, userId, stats);
+
+  // Final stats write
+  writePlayerStats(nk, userId, stats);
+
+  logger.info(`[Economy] Match resolved: MatchId=${matchId}, Player=${userId}, Won=${won}, LP Delta=${lpDelta}, Tier=${stats.tier}, ShieldConsumed=${shieldConsumed}, XP Gained=${xpGained}, SXP Gained=${sxpGained}`);
   return JSON.stringify({
     success: true,
     won,
     xp_gained: xpGained,
+    sxp_gained: sxpGained,
+    first_match_bonus: firstMatchBonus,
+    streak_bonus: streakBonus,
     shield_consumed: shieldConsumed,
     refunded_coins: coinsRefunded,
     new_coins: stats.coins,
     new_level: stats.level,
-    level_up: stats.level > oldLevel
+    level_up: stats.level > oldLevel,
+    lp_delta: lpDelta,
+    new_lp: stats.lp,
+    new_tier: stats.tier
   });
 }
 
@@ -692,25 +834,42 @@ function forceResolveMatchLoss(nk: nkruntime.Nakama, userId: string, arenaTier: 
 }
 
 function evaluateLevelUp(stats: any, inventory: any, logger: nkruntime.Logger): void {
-  // Level threshold calculation
+  // Cap at 500
+  if (stats.level >= 500) {
+    stats.level = 500;
+    stats.xp = 0;
+    stats.is_max_level_vip = true;
+    return;
+  }
+
+  // Level threshold calculation: easy up to 75, then scaling up to level 500
   const getXpThreshold = (level: number) => {
-    if (level <= 10) return 200;
-    if (level <= 20) return 400;
-    if (level <= 35) return 700;
-    if (level <= 50) return 1200;
+    if (level <= 75) return 100;
+    if (level <= 150) return 500;
+    if (level <= 300) return 1000;
     return 2000;
   };
 
   let currentThreshold = getXpThreshold(stats.level);
   while (stats.xp >= currentThreshold) {
+    if (stats.level >= 500) {
+      stats.level = 500;
+      stats.xp = 0;
+      stats.is_max_level_vip = true;
+      break;
+    }
     stats.xp -= currentThreshold;
     stats.level += 1;
     currentThreshold = getXpThreshold(stats.level);
 
+    if (stats.level === 500) {
+      stats.is_max_level_vip = true;
+      logger.info(`[LevelUp] Player reached max level 500! VIP perks enabled.`);
+    }
+
     // Milestone Level Rewards (Coins / Tokens / Cosmetics)
     let rewardCoins = 0;
     let unlockedCosmetic = "";
-    let spinTokens = 0;
 
     if (stats.level === 3) { rewardCoins = 100; }
     else if (stats.level === 5) { rewardCoins = 200; }
@@ -865,6 +1024,411 @@ function claimSignupRewardRpc(
   return JSON.stringify({ is_new_player: true, reward_coins: SIGNUP_BONUS_COINS });
 }
 
+function initializeSystemConfig(nk: nkruntime.Nakama, logger: nkruntime.Logger): void {
+  const collection = "system_config";
+  const key = "settings";
+  const systemUserId = "00000000-0000-0000-0000-000000000000";
+
+  try {
+    const result = nk.storageRead([{ collection, key, userId: systemUserId }]);
+    if (!result || result.length === 0) {
+      nk.storageWrite([{
+        collection,
+        key,
+        userId: systemUserId,
+        value: {
+          terms_of_service: (globalThis as any).DEFAULT_TERMS_OF_SERVICE,
+          privacy_policy: (globalThis as any).DEFAULT_PRIVACY_POLICY,
+          eula: (globalThis as any).DEFAULT_EULA,
+          min_app_version: "1.0.0",
+          latest_app_version: "1.0.0"
+        },
+        permissionRead: 2, // Public Read
+        permissionWrite: 0 // Server Only Write
+      }]);
+      logger.info("[Config] Default system settings initialized in storage.");
+    }
+  } catch (e) {
+    logger.error(`[Config] Error checking/writing system config: ${e}`);
+  }
+}
+
+function calculateTier(lp: number): string {
+  if (lp < 1000) return "Bronze";
+  if (lp < 2000) return "Silver";
+  if (lp < 3500) return "Gold";
+  if (lp < 5500) return "Platinum";
+  if (lp < 8000) return "Elite";
+  if (lp < 11000) return "Master";
+  return "Prestige";
+}
+
+function initializeAchievementsConfig(nk: nkruntime.Nakama, logger: nkruntime.Logger): void {
+  const collection = "system_config";
+  const key = "achievements";
+  const systemUserId = "00000000-0000-0000-0000-000000000000";
+
+  try {
+    const result = nk.storageRead([{ collection, key, userId: systemUserId }]);
+    if (!result || result.length === 0) {
+      const defaultAchievements = [
+        {
+          id: "first_win",
+          name: "First Blood",
+          des: "Win your first ranked match",
+          icon: "⚔️",
+          achievement_type: "Combat",
+          requirement_type: "wins",
+          requirement_value: 1,
+          reward_coins: 100,
+          gold: false
+        },
+        {
+          id: "wins_100",
+          name: "Centurion",
+          des: "Reach 100 total wins",
+          icon: "💯",
+          achievement_type: "Milestone",
+          requirement_type: "wins",
+          requirement_value: 100,
+          reward_coins: 500,
+          gold: false
+        },
+        {
+          id: "coins_50k",
+          name: "High Roller",
+          des: "Amass 50k gold coins",
+          icon: "💎",
+          achievement_type: "Economy",
+          requirement_type: "coins",
+          requirement_value: 50000,
+          reward_coins: 1000,
+          gold: true
+        },
+        {
+          id: "streak_10",
+          name: "Unstoppable",
+          des: "Achieve a 10-win streak",
+          icon: "🔥",
+          achievement_type: "Skill",
+          requirement_type: "streak",
+          requirement_value: 10,
+          reward_coins: 300,
+          gold: false
+        },
+        {
+          id: "elite_ascent",
+          name: "Elite Ascent",
+          des: "Reach Elite Tier",
+          icon: "👑",
+          achievement_type: "Milestone",
+          requirement_type: "tier",
+          requirement_value: 5500, // Elite start LP
+          reward_coins: 700,
+          gold: true
+        }
+      ];
+
+      nk.storageWrite([{
+        collection,
+        key,
+        userId: systemUserId,
+        value: { achievements: defaultAchievements },
+        permissionRead: 2, // Public Read
+        permissionWrite: 0 // Server Only Write
+      }]);
+      logger.info("[Achievements] Default achievements configuration initialized.");
+    }
+  } catch (e) {
+    logger.error(`[Achievements] Error checking/writing achievements config: ${e}`);
+  }
+}
+
+function updateAchievementsProgress(nk: nkruntime.Nakama, logger: nkruntime.Logger, userId: string, stats: any): void {
+  const systemUserId = "00000000-0000-0000-0000-000000000000";
+  let achievementsConfig: any[] = [];
+  try {
+    const configRead = nk.storageRead([{ collection: "system_config", key: "achievements", userId: systemUserId }]);
+    if (configRead && configRead.length > 0) {
+      achievementsConfig = configRead[0].value.achievements || [];
+    }
+  } catch (e) {
+    logger.error(`[Achievements] Error reading achievements config: ${e}`);
+    return;
+  }
+
+  if (achievementsConfig.length === 0) return;
+
+  // Read player progress
+  let progress: Record<string, any> = {};
+  try {
+    const progressRead = nk.storageRead([{ collection: "player_achievements", key: "progress", userId }]);
+    if (progressRead && progressRead.length > 0) {
+      progress = progressRead[0].value.progress || {};
+    }
+  } catch (e) {
+    logger.error(`[Achievements] Error reading player progress: ${e}`);
+  }
+
+  let updated = false;
+  let rewardedCoins = 0;
+
+  for (const ach of achievementsConfig) {
+    const achId = ach.id;
+    if (progress[achId] && progress[achId].unlocked) {
+      continue; // Already unlocked
+    }
+
+    let currentValue = 0;
+    let requirementValue = ach.requirement_value;
+    let meetsRequirement = false;
+
+    switch (ach.requirement_type) {
+      case "wins":
+        currentValue = stats.wins || 0;
+        meetsRequirement = currentValue >= requirementValue;
+        break;
+      case "coins":
+        currentValue = stats.coins || 0;
+        meetsRequirement = currentValue >= requirementValue;
+        break;
+      case "streak":
+        currentValue = stats.best_streak || 0;
+        meetsRequirement = currentValue >= requirementValue;
+        break;
+      case "tier":
+        currentValue = stats.lp || 0;
+        meetsRequirement = currentValue >= requirementValue;
+        break;
+      case "level":
+        currentValue = stats.level || 0;
+        meetsRequirement = currentValue >= requirementValue;
+        break;
+    }
+
+    if (meetsRequirement) {
+      progress[achId] = {
+        unlocked: true,
+        unlocked_at: Date.now()
+      };
+      rewardedCoins += ach.reward_coins || 0;
+      updated = true;
+      logger.info(`[Achievements] Player ${userId} unlocked achievement: ${ach.name} (+${ach.reward_coins}c)`);
+    } else {
+      // Update progress value
+      if (!progress[achId]) {
+        progress[achId] = {
+          unlocked: false,
+          current_value: currentValue
+        };
+        updated = true;
+      } else if (progress[achId].current_value !== currentValue) {
+        progress[achId].current_value = currentValue;
+        updated = true;
+      }
+    }
+  }
+
+  if (updated) {
+    try {
+      nk.storageWrite([{
+        collection: "player_achievements",
+        key: "progress",
+        userId,
+        value: { progress },
+        permissionRead: 1,
+        permissionWrite: 0
+      }]);
+    } catch (e) {
+      logger.error(`[Achievements] Error writing progress: ${e}`);
+    }
+
+    if (rewardedCoins > 0) {
+      stats.coins += rewardedCoins;
+      nk.walletUpdate(userId, { coins: rewardedCoins }, { source: "achievement_unlock" });
+      logger.info(`[Achievements] Credited +${rewardedCoins} coins to player ${userId} for achievements.`);
+    }
+  }
+}
+
+function writeMatchHistoryRecord(
+  nk: nkruntime.Nakama,
+  userId: string,
+  matchId: string,
+  arenaTier: string,
+  won: boolean,
+  lpDelta: number,
+  coinsPayout: number,
+  isPrivate: boolean
+): void {
+  let history: any[] = [];
+  try {
+    const read = nk.storageRead([{ collection: "player_match_history", key: "history", userId }]);
+    if (read && read.length > 0) {
+      history = read[0].value.history || [];
+    }
+  } catch (e) {
+    // History does not exist yet
+  }
+
+  const newRecord = {
+    match_id: matchId,
+    game_mode: isPrivate ? "Private Match" : `Ranked ${arenaTier.charAt(0).toUpperCase() + arenaTier.slice(1)}`,
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    score: "", // Can be filled in client
+    won,
+    lp_delta: lpDelta,
+    coins: coinsPayout,
+    is_private: isPrivate
+  };
+
+  history.unshift(newRecord);
+  if (history.length > 20) {
+    history = history.slice(0, 20); // Keep last 20 matches
+  }
+
+  try {
+    nk.storageWrite([{
+      collection: "player_match_history",
+      key: "history",
+      userId,
+      value: { history },
+      permissionRead: 1,
+      permissionWrite: 0
+    }]);
+  } catch (e) {
+    // Silent fail
+  }
+}
+
+function getAchievementsStatusRpc(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  _payload: string
+): string {
+  const userId = ctx.userId;
+  if (!userId) throw new Error("Unauthenticated request.");
+
+  const systemUserId = "00000000-0000-0000-0000-000000000000";
+  let achievementsConfig: any[] = [];
+  try {
+    const configRead = nk.storageRead([{ collection: "system_config", key: "achievements", userId: systemUserId }]);
+    if (configRead && configRead.length > 0) {
+      achievementsConfig = configRead[0].value.achievements || [];
+    }
+  } catch (e) {
+    logger.error(`[Achievements] Error reading achievements config RPC: ${e}`);
+  }
+
+  let progress: Record<string, any> = {};
+  try {
+    const progressRead = nk.storageRead([{ collection: "player_achievements", key: "progress", userId }]);
+    if (progressRead && progressRead.length > 0) {
+      progress = progressRead[0].value.progress || {};
+    }
+  } catch (e) {
+    // Progress not started yet
+  }
+
+  const joinedAchievements = achievementsConfig.map((ach) => {
+    const prog = progress[ach.id] || { unlocked: false, current_value: 0 };
+    return {
+      name: ach.name,
+      des: ach.des,
+      icon: ach.icon,
+      unlocked: prog.unlocked,
+      unlocked_at: prog.unlocked_at || 0,
+      achievement_type: ach.achievement_type,
+      requirement: `${prog.current_value || 0} / ${ach.requirement_value}`,
+      reward: `${ach.reward_coins} Coins`,
+      gold: ach.gold
+    };
+  });
+
+  return JSON.stringify({ achievements: joinedAchievements });
+}
+
+function getMatchHistoryRpc(
+  ctx: nkruntime.Context,
+  _logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  _payload: string
+): string {
+  const userId = ctx.userId;
+  if (!userId) throw new Error("Unauthenticated request.");
+
+  let history: any[] = [];
+  try {
+    const read = nk.storageRead([{ collection: "player_match_history", key: "history", userId }]);
+    if (read && read.length > 0) {
+      history = read[0].value.history || [];
+    }
+  } catch (e) {
+    // Empty history
+  }
+
+  return JSON.stringify({ match_history: history });
+}
+
+function updateAchievementsConfigRpc(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  payload: string
+): string {
+  try {
+    const parsed = payload ? JSON.parse(payload) : null;
+    if (!parsed || !Array.isArray(parsed.achievements)) {
+      return JSON.stringify({ success: false, error: "Invalid payload: missing achievements array." });
+    }
+
+    nk.storageWrite([{
+      collection: "system_config",
+      key: "achievements",
+      userId: "00000000-0000-0000-0000-000000000000",
+      value: parsed,
+      permissionRead: 2, // Public Read
+      permissionWrite: 0, // Server Write Only
+    }]);
+
+    logger.info("[Economy] Dynamic achievements config updated via admin RPC.");
+    return JSON.stringify({ success: true });
+  } catch (e) {
+    logger.error(`[Economy] Failed to update achievements config: ${(e as Error).message}`);
+    return JSON.stringify({ success: false, error: (e as Error).message });
+  }
+}
+
+function updateSystemSettingsConfigRpc(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  payload: string
+): string {
+  try {
+    const parsed = payload ? JSON.parse(payload) : null;
+    if (!parsed) {
+      return JSON.stringify({ success: false, error: "Invalid empty payload." });
+    }
+
+    nk.storageWrite([{
+      collection: "system_config",
+      key: "settings",
+      userId: "00000000-0000-0000-0000-000000000000",
+      value: parsed,
+      permissionRead: 2, // Public Read
+      permissionWrite: 0, // Server Write Only
+    }]);
+
+    logger.info("[Economy] Dynamic system settings config updated via admin RPC.");
+    return JSON.stringify({ success: true });
+  } catch (e) {
+    logger.error(`[Economy] Failed to update system settings config: ${(e as Error).message}`);
+    return JSON.stringify({ success: false, error: (e as Error).message });
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Module entry point — registers only economy-domain RPCs
 // ---------------------------------------------------------------------------
@@ -887,6 +1451,12 @@ function InitModule(
   initializer.registerRpc("start_match",         startMatchRpc);
   initializer.registerRpc("end_match",           endMatchRpc);
   initializer.registerRpc("get_active_match",    getActiveMatchRpc);
+  initializer.registerRpc("get_achievements_status", getAchievementsStatusRpc);
+  initializer.registerRpc("get_match_history",    getMatchHistoryRpc);
+  initializer.registerRpc("update_achievements_config", updateAchievementsConfigRpc);
+  initializer.registerRpc("update_system_settings_config", updateSystemSettingsConfigRpc);
 
   logger.info("[Economy] Economy module loaded successfully.");
 }
+
+
