@@ -5,6 +5,7 @@ const authJs = fs.readFileSync(path.join(__dirname, 'auth.js'), 'utf8');
 const economyJs = fs.readFileSync(path.join(__dirname, 'economy.js'), 'utf8');
 const seasonalJs = fs.readFileSync(path.join(__dirname, 'seasonal.js'), 'utf8');
 const legalJs = fs.readFileSync(path.join(__dirname, 'legal_defaults.js'), 'utf8');
+const friendsJs = fs.readFileSync(path.join(__dirname, 'friends.js'), 'utf8');
 
 function stripInitModule(content) {
   const marker = 'function InitModule(';
@@ -18,6 +19,7 @@ function stripInitModule(content) {
 const cleanAuth = stripInitModule(authJs);
 const cleanEconomy = stripInitModule(economyJs);
 const cleanSeasonal = stripInitModule(seasonalJs);
+const cleanFriends = stripInitModule(friendsJs);
 
 const combinedInitModule = `
 // ─────────────────────────────────────────────────────────────────────────────
@@ -37,6 +39,7 @@ function InitModule(ctx, logger, nk, initializer) {
   // Economy Module RPCs
   initializer.registerRpc("claim_daily_login",  claimDailyLoginRpc);
   initializer.registerRpc("get_daily_rewards_status", getDailyRewardsStatusRpc);
+  initializer.registerRpc("get_arena_config",    getArenaConfigRpc);
   initializer.registerRpc("spin_wheel",          spinWheelRpc);
   initializer.registerRpc("buy_cosmetic",        buyCosmeticRpc);
   initializer.registerRpc("ad_callback",         adCallbackRpc);
@@ -52,6 +55,7 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("get_match_history",    getMatchHistoryRpc);
   initializer.registerRpc("update_achievements_config", updateAchievementsConfigRpc);
   initializer.registerRpc("update_system_settings_config", updateSystemSettingsConfigRpc);
+  initializer.registerRpc("update_arena_config",          updateArenaConfigRpc);
 
   // Seasonal RPCs
   initializer.registerRpc("get_seasonal_status",    getSeasonalStatusRpc);
@@ -60,9 +64,12 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("claim_weekly_challenge", claimWeeklyChallengeRpc);
   initializer.registerRpc("update_seasonal_config", updateSeasonalConfigRpc);
 
+  // Friends Module RPCs
+  initializer.registerRpc("search_user_by_username", searchUserByUsernameRpc);
 
   logger.info("[Economy] Economy module loaded successfully.");
   logger.info("[Seasonal] Seasonal module loaded successfully.");
+  logger.info("[Friends] Friends module loaded successfully.");
   logger.info("[Runtime] All U10 modules initialized successfully.");
 }
 `;
@@ -92,6 +99,11 @@ ${cleanEconomy}
 // SEASONAL DOMAIN
 // ─────────────────────────────────────────────────────────────────────────────
 ${cleanSeasonal}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FRIENDS DOMAIN
+// ─────────────────────────────────────────────────────────────────────────────
+${cleanFriends}
 ${combinedInitModule}
 `;
 

@@ -17,14 +17,86 @@
 /** Base coin rewards for Day 1–7 (Cycle 1). */
 const DAILY_REWARDS_BASE: number[] = [50, 75, 100, 125, 150, 200, 350];
 
-/** Coin entry fee for each arena tier. */
-const ARENA_ENTRY_FEES: Record<string, number> = {
-  starter: 100,
-  bronze: 200,
-  silver: 500,
-  gold: 1000,
-  platinum: 2000,
+/** Full arena configuration — drives lobby UI and entry fee validation. */
+const ARENA_CONFIG: Record<string, any> = {
+  practice: {
+    name: "WARM-UP",
+    badge: "BEGINNER",
+    badge_color: "red",
+    entry_fee: 0,
+    offer_fee: 0,
+    desc: "Play for free with bots. Gain experience.",
+    gradient: "red_magenta",
+    order: 0,
+    jackpot: 0,
+    tier_label: "",
+  },
+  starter: {
+    name: "WOODEN LEAGUE",
+    badge: "LEAGUE I",
+    badge_color: "teal",
+    entry_fee: 50,
+    offer_fee: 0,
+    desc: "Beginner-friendly arena.",
+    gradient: "teal_cyan",
+    order: 1,
+    jackpot: 0,
+    tier_label: "",
+  },
+  bronze: {
+    name: "IRON FORGE",
+    badge: "LEAGUE II",
+    badge_color: "pink",
+    entry_fee: 250,
+    offer_fee: 0,
+    desc: "Step up the competition.",
+    gradient: "pink_magenta",
+    order: 2,
+    jackpot: 0,
+    tier_label: "",
+  },
+  silver: {
+    name: "SILVER LEAGUE",
+    badge: "LEAGUE III",
+    badge_color: "silver",
+    entry_fee: 500,
+    offer_fee: 0,
+    desc: "Balanced play for skilled callers.",
+    gradient: "silver_blue",
+    order: 3,
+    jackpot: 0,
+    tier_label: "",
+  },
+  gold: {
+    name: "DIAMOND LOUNGE",
+    badge: "ELITE ONLY",
+    badge_color: "purple",
+    entry_fee: 1000,
+    offer_fee: 0,
+    desc: "High stakes, maximum rewards. Pure chaos awaits.",
+    gradient: "purple_deep",
+    order: 4,
+    jackpot: 50000,
+    tier_label: "JACKPOT",
+  },
+  platinum: {
+    name: "DIAMOND LEAGUE",
+    badge: "LEGENDARY ONLY",
+    badge_color: "gold",
+    entry_fee: 2000,
+    offer_fee: 0,
+    desc: "The pinnacle of skill. Only for the true masters of chaos.",
+    gradient: "navy_gold",
+    order: 5,
+    jackpot: 0,
+    tier_label: "ENTRY FEE",
+  },
 };
+
+/** Derived entry fee map for backward compatibility with start_match. */
+const ARENA_ENTRY_FEES: Record<string, number> = Object.fromEntries(
+  Object.entries(ARENA_CONFIG).map(([k, v]) => [k, v.entry_fee as number])
+);
 
 // ---------------------------------------------------------------------------
 // Storage helpers
@@ -528,6 +600,79 @@ function applyAdMultiplierRpc(
 }
 
 // ---------------------------------------------------------------------------
+// RPC: get_arena_config
+// ---------------------------------------------------------------------------
+
+function readArenaConfig(nk: nkruntime.Nakama): Record<string, any> {
+  const result = nk.storageRead([{
+    collection: "system_config",
+    key: "arena_list",
+    userId: "00000000-0000-0000-0000-000000000000",
+  }]);
+  if (result && result.length > 0 && result[0].value) {
+    return result[0].value as Record<string, any>;
+  }
+  // Seed the DB on first load
+  nk.storageWrite([{
+    collection: "system_config",
+    key: "arena_list",
+    userId: "00000000-0000-0000-0000-000000000000",
+    value: ARENA_CONFIG,
+    permissionRead: 2,
+    permissionWrite: 0,
+  }]);
+  return ARENA_CONFIG;
+}
+
+function readArenaOffers(nk: nkruntime.Nakama): Record<string, number> {
+  // Admin-configurable offer overrides stored in system_config/arena_offers
+  // Format: { "starter": 30, "bronze": 150, ... } — offer_fee per tier
+  const result = nk.storageRead([{
+    collection: "system_config",
+    key: "arena_offers",
+    userId: "00000000-0000-0000-0000-000000000000",
+  }]);
+  if (result && result.length > 0 && result[0].value) {
+    return result[0].value as Record<string, number>;
+  }
+  return {};
+}
+
+function getArenaConfigRpc(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  payload: string
+): string {
+  // Read dynamic base config
+  const baseConfig = readArenaConfig(nk);
+  // Read admin offer overrides
+  const offers = readArenaOffers(nk);
+
+  // Build arena list sorted by order
+  const arenas: any[] = [];
+  for (const [tier, config] of Object.entries(baseConfig)) {
+    const arena: any = { ...config, id: tier };
+
+    // Apply offer override if present
+    if (offers[tier] !== undefined && offers[tier] !== null) {
+      const offerFee = Number(offers[tier]);
+      if (offerFee >= 0 && offerFee < arena.entry_fee) {
+        arena.offer_fee = offerFee;
+      }
+    }
+
+    arenas.push(arena);
+  }
+
+  // Sort by order field
+  arenas.sort((a: any, b: any) => a.order - b.order);
+
+  logger.info(`[Economy] Arena config served. ${arenas.length} arenas, ${Object.keys(offers).length} active offers.`);
+  return JSON.stringify({ success: true, arenas });
+}
+
+// ---------------------------------------------------------------------------
 // RPC: start_match
 // ---------------------------------------------------------------------------
 
@@ -543,10 +688,21 @@ function startMatchRpc(
   const parsed = JSON.parse(payload);
   const arenaTier: string = parsed.arena_tier;
   const isPrivate: boolean = parsed.is_private === true;
-  let entryFee = ARENA_ENTRY_FEES[arenaTier];
 
-  if (entryFee === undefined) {
+  const baseConfig = readArenaConfig(nk);
+  const arena = baseConfig[arenaTier];
+  if (!arena) {
     return JSON.stringify({ success: false, error: "Invalid arena tier." });
+  }
+  let entryFee = arena.entry_fee;
+
+  // Apply active offer pricing if available
+  const offers = readArenaOffers(nk);
+  if (offers[arenaTier] !== undefined && offers[arenaTier] !== null) {
+    const offerFee = Number(offers[arenaTier]);
+    if (offerFee >= 0 && offerFee < entryFee) {
+      entryFee = offerFee;
+    }
   }
 
   const stats = readPlayerStats(nk, userId);
@@ -1429,6 +1585,47 @@ function updateSystemSettingsConfigRpc(
   }
 }
 
+function updateArenaConfigRpc(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  payload: string
+): string {
+  try {
+    const parsed = payload ? JSON.parse(payload) : null;
+    if (!parsed || !parsed.arenas) {
+      return JSON.stringify({ success: false, error: "Invalid payload: missing arenas." });
+    }
+
+    // Write base arena configuration list
+    nk.storageWrite([{
+      collection: "system_config",
+      key: "arena_list",
+      userId: "00000000-0000-0000-0000-000000000000",
+      value: parsed.arenas,
+      permissionRead: 2, // Public Read
+      permissionWrite: 0, // Server Write Only
+    }]);
+
+    // Write active offer discounts
+    const offers = parsed.offers || {};
+    nk.storageWrite([{
+      collection: "system_config",
+      key: "arena_offers",
+      userId: "00000000-0000-0000-0000-000000000000",
+      value: offers,
+      permissionRead: 2, // Public Read
+      permissionWrite: 0, // Server Write Only
+    }]);
+
+    logger.info("[Economy] Dynamic arena config and offers updated via admin RPC.");
+    return JSON.stringify({ success: true });
+  } catch (e) {
+    logger.error(`[Economy] Failed to update arena config: ${(e as Error).message}`);
+    return JSON.stringify({ success: false, error: (e as Error).message });
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Module entry point — registers only economy-domain RPCs
 // ---------------------------------------------------------------------------
@@ -1441,6 +1638,7 @@ function InitModule(
 ): void {
   initializer.registerRpc("claim_daily_login",  claimDailyLoginRpc);
   initializer.registerRpc("get_daily_rewards_status", getDailyRewardsStatusRpc);
+  initializer.registerRpc("get_arena_config",    getArenaConfigRpc);
   initializer.registerRpc("spin_wheel",          spinWheelRpc);
   initializer.registerRpc("buy_cosmetic",        buyCosmeticRpc);
   initializer.registerRpc("ad_callback",         adCallbackRpc);
@@ -1455,6 +1653,7 @@ function InitModule(
   initializer.registerRpc("get_match_history",    getMatchHistoryRpc);
   initializer.registerRpc("update_achievements_config", updateAchievementsConfigRpc);
   initializer.registerRpc("update_system_settings_config", updateSystemSettingsConfigRpc);
+  initializer.registerRpc("update_arena_config",          updateArenaConfigRpc);
 
   logger.info("[Economy] Economy module loaded successfully.");
 }

@@ -1314,14 +1314,18 @@ function updateProfileRpc(ctx, logger, nk, payload) {
 // ---------------------------------------------------------------------------
 /** Base coin rewards for Day 1–7 (Cycle 1). */
 const DAILY_REWARDS_BASE = [50, 75, 100, 125, 150, 200, 350];
-/** Coin entry fee for each arena tier. */
-const ARENA_ENTRY_FEES = {
-    starter: 100,
-    bronze: 200,
-    silver: 500,
-    gold: 1000,
-    platinum: 2000,
+/** Full arena configuration — drives lobby UI and entry fee validation. */
+var ARENA_CONFIG = {
+    practice: { name: "WARM-UP", badge: "BEGINNER", badge_color: "red", entry_fee: 0, offer_fee: 0, desc: "Play for free with bots. Gain experience.", gradient: "red_magenta", order: 0, jackpot: 0, tier_label: "" },
+    starter: { name: "WOODEN LEAGUE", badge: "LEAGUE I", badge_color: "teal", entry_fee: 50, offer_fee: 0, desc: "Beginner-friendly arena.", gradient: "teal_cyan", order: 1, jackpot: 0, tier_label: "" },
+    bronze: { name: "IRON FORGE", badge: "LEAGUE II", badge_color: "pink", entry_fee: 250, offer_fee: 0, desc: "Step up the competition.", gradient: "pink_magenta", order: 2, jackpot: 0, tier_label: "" },
+    silver: { name: "SILVER LEAGUE", badge: "LEAGUE III", badge_color: "silver", entry_fee: 500, offer_fee: 0, desc: "Balanced play for skilled callers.", gradient: "silver_blue", order: 3, jackpot: 0, tier_label: "" },
+    gold: { name: "DIAMOND LOUNGE", badge: "ELITE ONLY", badge_color: "purple", entry_fee: 1000, offer_fee: 0, desc: "High stakes, maximum rewards. Pure chaos awaits.", gradient: "purple_deep", order: 4, jackpot: 50000, tier_label: "JACKPOT" },
+    platinum: { name: "DIAMOND LEAGUE", badge: "LEGENDARY ONLY", badge_color: "gold", entry_fee: 2000, offer_fee: 0, desc: "The pinnacle of skill. Only for the true masters of chaos.", gradient: "navy_gold", order: 5, jackpot: 0, tier_label: "ENTRY FEE" },
 };
+/** Derived entry fee map for backward compatibility with start_match. */
+var ARENA_ENTRY_FEES = {};
+for (var _k in ARENA_CONFIG) { ARENA_ENTRY_FEES[_k] = ARENA_CONFIG[_k].entry_fee; }
 // ---------------------------------------------------------------------------
 // Storage helpers
 // ---------------------------------------------------------------------------
@@ -1770,6 +1774,59 @@ function applyAdMultiplierRpc(ctx, logger, nk, payload) {
     });
 }
 // ---------------------------------------------------------------------------
+// RPC: get_arena_config
+// ---------------------------------------------------------------------------
+function readArenaConfig(nk) {
+    var result = nk.storageRead([{
+        collection: "system_config",
+        key: "arena_list",
+        userId: "00000000-0000-0000-0000-000000000000",
+    }]);
+    if (result && result.length > 0 && result[0].value) {
+        return result[0].value;
+    }
+    // Seed the DB on first load
+    nk.storageWrite([{
+        collection: "system_config",
+        key: "arena_list",
+        userId: "00000000-0000-0000-0000-000000000000",
+        value: ARENA_CONFIG,
+        permissionRead: 2,
+        permissionWrite: 0,
+    }]);
+    return ARENA_CONFIG;
+}
+function readArenaOffers(nk) {
+    var result = nk.storageRead([{
+        collection: "system_config",
+        key: "arena_offers",
+        userId: "00000000-0000-0000-0000-000000000000",
+    }]);
+    if (result && result.length > 0 && result[0].value) {
+        return result[0].value;
+    }
+    return {};
+}
+function getArenaConfigRpc(ctx, logger, nk, payload) {
+    var baseConfig = readArenaConfig(nk);
+    var offers = readArenaOffers(nk);
+    var arenas = [];
+    for (var tier in baseConfig) {
+        var config = baseConfig[tier];
+        var arena = Object.assign({}, config, { id: tier });
+        if (offers[tier] !== undefined && offers[tier] !== null) {
+            var offerFee = Number(offers[tier]);
+            if (offerFee >= 0 && offerFee < arena.entry_fee) {
+                arena.offer_fee = offerFee;
+            }
+        }
+        arenas.push(arena);
+    }
+    arenas.sort(function(a, b) { return a.order - b.order; });
+    logger.info("[Economy] Arena config served. " + arenas.length + " arenas, " + Object.keys(offers).length + " active offers.");
+    return JSON.stringify({ success: true, arenas: arenas });
+}
+// ---------------------------------------------------------------------------
 // RPC: start_match
 // ---------------------------------------------------------------------------
 function startMatchRpc(ctx, logger, nk, payload) {
@@ -1779,9 +1836,21 @@ function startMatchRpc(ctx, logger, nk, payload) {
     const parsed = JSON.parse(payload);
     const arenaTier = parsed.arena_tier;
     const isPrivate = parsed.is_private === true;
-    let entryFee = ARENA_ENTRY_FEES[arenaTier];
-    if (entryFee === undefined) {
+    
+    var baseConfig = readArenaConfig(nk);
+    var arena = baseConfig[arenaTier];
+    if (!arena) {
         return JSON.stringify({ success: false, error: "Invalid arena tier." });
+    }
+    let entryFee = arena.entry_fee;
+    
+    // Apply active offer pricing if available
+    var offers = readArenaOffers(nk);
+    if (offers[arenaTier] !== undefined && offers[arenaTier] !== null) {
+        var offerFee = Number(offers[arenaTier]);
+        if (offerFee >= 0 && offerFee < entryFee) {
+            entryFee = offerFee;
+        }
     }
     const stats = readPlayerStats(nk, userId);
     // If match is private and host level >= 500, match is free to host/join
@@ -2583,6 +2652,40 @@ function updateSystemSettingsConfigRpc(ctx, logger, nk, payload) {
     }
 }
 
+function updateArenaConfigRpc(ctx, logger, nk, payload) {
+    try {
+        var parsed = payload ? JSON.parse(payload) : null;
+        if (!parsed || !parsed.arenas) {
+            return JSON.stringify({ success: false, error: "Invalid payload: missing arenas." });
+        }
+        // Write base arena configuration list
+        nk.storageWrite([{
+                collection: "system_config",
+                key: "arena_list",
+                userId: "00000000-0000-0000-0000-000000000000",
+                value: parsed.arenas,
+                permissionRead: 2,
+                permissionWrite: 0,
+            }]);
+        // Write active offer discounts
+        var offers = parsed.offers || {};
+        nk.storageWrite([{
+                collection: "system_config",
+                key: "arena_offers",
+                userId: "00000000-0000-0000-0000-000000000000",
+                value: offers,
+                permissionRead: 2,
+                permissionWrite: 0,
+            }]);
+        logger.info("[Economy] Dynamic arena config and offers updated via admin RPC.");
+        return JSON.stringify({ success: true });
+    }
+    catch (e) {
+        logger.error("[Economy] Failed to update arena config: " + e.message);
+        return JSON.stringify({ success: false, error: e.message });
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Module entry point — registers only economy-domain RPCs
 // ---------------------------------------------------------------------------
@@ -3210,6 +3313,88 @@ function updateSeasonalConfigRpc(ctx, logger, nk, payload) {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// FRIENDS DOMAIN
+// ─────────────────────────────────────────────────────────────────────────────
+// =============================================================================
+// U10 — Friends & Social Module (JavaScript)
+// =============================================================================
+// Compiled equivalent of friends.ts for Nakama runtime.
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// RPC: search_user_by_username
+// ---------------------------------------------------------------------------
+
+function searchUserByUsernameRpc(ctx, logger, nk, payload) {
+  if (!ctx.userId) {
+    throw new Error("Unauthenticated");
+  }
+
+  var request;
+  try {
+    request = JSON.parse(payload || "{}");
+  } catch (_e) {
+    throw new Error("Invalid JSON payload");
+  }
+
+  var username = (request.username || "").trim();
+  if (!username) {
+    throw new Error("Missing required field: username");
+  }
+
+  // Nakama's usersGetUsername returns an array of user objects.
+  var users;
+  try {
+    users = nk.usersGetUsername([username]);
+  } catch (e) {
+    logger.error('[Friends] Error searching for username "' + username + '": ' + e.message);
+    return JSON.stringify({ found: false });
+  }
+
+  if (!users || users.length === 0) {
+    return JSON.stringify({ found: false });
+  }
+
+  var u = users[0];
+
+  // Don't allow a user to find themselves via search
+  if (u.userId === ctx.userId) {
+    return JSON.stringify({ found: false, self: true });
+  }
+
+  // Read the user's player_stats to get their level
+  var level = 1;
+  try {
+    var statsResult = nk.storageRead([{
+      collection: "player_stats",
+      key: "stats",
+      userId: u.userId,
+    }]);
+    if (statsResult && statsResult.length > 0) {
+      var stats = statsResult[0].value;
+      level = stats.level || 1;
+    }
+  } catch (_e) {
+    // Non-fatal: return level 1 as default
+  }
+
+  logger.info("[Friends] User " + ctx.userId + " found player: " + u.username + " (" + u.userId + ")");
+
+  return JSON.stringify({
+    found: true,
+    user: {
+      id: u.userId,
+      username: u.username,
+      display_name: u.displayName || u.username,
+      avatar_url: u.avatarUrl || "",
+      level: level,
+    },
+  });
+}
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RUNTIME ENTRY POINT
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -3226,6 +3411,7 @@ function InitModule(ctx, logger, nk, initializer) {
   // Economy Module RPCs
   initializer.registerRpc("claim_daily_login",  claimDailyLoginRpc);
   initializer.registerRpc("get_daily_rewards_status", getDailyRewardsStatusRpc);
+  initializer.registerRpc("get_arena_config",    getArenaConfigRpc);
   initializer.registerRpc("spin_wheel",          spinWheelRpc);
   initializer.registerRpc("buy_cosmetic",        buyCosmeticRpc);
   initializer.registerRpc("ad_callback",         adCallbackRpc);
@@ -3241,6 +3427,7 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("get_match_history",    getMatchHistoryRpc);
   initializer.registerRpc("update_achievements_config", updateAchievementsConfigRpc);
   initializer.registerRpc("update_system_settings_config", updateSystemSettingsConfigRpc);
+  initializer.registerRpc("update_arena_config",          updateArenaConfigRpc);
 
   // Seasonal RPCs
   initializer.registerRpc("get_seasonal_status",    getSeasonalStatusRpc);
@@ -3249,9 +3436,12 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("claim_weekly_challenge", claimWeeklyChallengeRpc);
   initializer.registerRpc("update_seasonal_config", updateSeasonalConfigRpc);
 
+  // Friends Module RPCs
+  initializer.registerRpc("search_user_by_username", searchUserByUsernameRpc);
 
   logger.info("[Economy] Economy module loaded successfully.");
   logger.info("[Seasonal] Seasonal module loaded successfully.");
+  logger.info("[Friends] Friends module loaded successfully.");
   logger.info("[Runtime] All U10 modules initialized successfully.");
 }
 
