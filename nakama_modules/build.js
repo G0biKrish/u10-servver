@@ -17,7 +17,10 @@ function stripInitModule(content) {
 }
 
 const cleanAuth = stripInitModule(authJs);
-const cleanEconomy = stripInitModule(economyJs);
+const cleanEconomyRaw = stripInitModule(economyJs);
+const arenaDefaults = fs.readFileSync(path.join(__dirname, 'arena_defaults.json'), 'utf8').trim();
+const escapedDefaults = JSON.stringify(JSON.parse(arenaDefaults));
+const cleanEconomy = cleanEconomyRaw.replace('/*ARENA_DEFAULTS_PLACEHOLDER*/', escapedDefaults);
 const cleanSeasonal = stripInitModule(seasonalJs);
 const cleanFriends = stripInitModule(friendsJs);
 

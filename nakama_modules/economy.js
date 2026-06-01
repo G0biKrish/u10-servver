@@ -15,18 +15,7 @@
 // ---------------------------------------------------------------------------
 /** Base coin rewards for Day 1–7 (Cycle 1). */
 const DAILY_REWARDS_BASE = [50, 75, 100, 125, 150, 200, 350];
-/** Full arena configuration — drives lobby UI and entry fee validation. */
-var ARENA_CONFIG = {
-    practice: { name: "WARM-UP", badge: "BEGINNER", badge_color: "red", entry_fee: 0, offer_fee: 0, desc: "Play for free with bots. Gain experience.", gradient: "red_magenta", order: 0, jackpot: 0, tier_label: "" },
-    starter: { name: "WOODEN LEAGUE", badge: "LEAGUE I", badge_color: "teal", entry_fee: 50, offer_fee: 0, desc: "Beginner-friendly arena.", gradient: "teal_cyan", order: 1, jackpot: 0, tier_label: "" },
-    bronze: { name: "IRON FORGE", badge: "LEAGUE II", badge_color: "pink", entry_fee: 250, offer_fee: 0, desc: "Step up the competition.", gradient: "pink_magenta", order: 2, jackpot: 0, tier_label: "" },
-    silver: { name: "SILVER LEAGUE", badge: "LEAGUE III", badge_color: "silver", entry_fee: 500, offer_fee: 0, desc: "Balanced play for skilled callers.", gradient: "silver_blue", order: 3, jackpot: 0, tier_label: "" },
-    gold: { name: "DIAMOND LOUNGE", badge: "ELITE ONLY", badge_color: "purple", entry_fee: 1000, offer_fee: 0, desc: "High stakes, maximum rewards. Pure chaos awaits.", gradient: "purple_deep", order: 4, jackpot: 50000, tier_label: "JACKPOT" },
-    platinum: { name: "DIAMOND LEAGUE", badge: "LEGENDARY ONLY", badge_color: "gold", entry_fee: 2000, offer_fee: 0, desc: "The pinnacle of skill. Only for the true masters of chaos.", gradient: "navy_gold", order: 5, jackpot: 0, tier_label: "ENTRY FEE" },
-};
-/** Derived entry fee map for backward compatibility with start_match. */
-var ARENA_ENTRY_FEES = {};
-for (var _k in ARENA_CONFIG) { ARENA_ENTRY_FEES[_k] = ARENA_CONFIG[_k].entry_fee; }
+
 // ---------------------------------------------------------------------------
 // Storage helpers
 // ---------------------------------------------------------------------------
@@ -479,23 +468,25 @@ function applyAdMultiplierRpc(ctx, logger, nk, payload) {
 // ---------------------------------------------------------------------------
 function readArenaConfig(nk) {
     var result = nk.storageRead([{
-        collection: "system_config",
-        key: "arena_list",
-        userId: "00000000-0000-0000-0000-000000000000",
-    }]);
+            collection: "system_config",
+            key: "arena_list",
+            userId: "00000000-0000-0000-0000-000000000000",
+        }]);
     if (result && result.length > 0 && result[0].value) {
         return result[0].value;
     }
-    // Seed the DB on first load
+    
+    // Seed the DB on first load using injected defaults
+    var defaults = JSON.parse('/*ARENA_DEFAULTS_PLACEHOLDER*/');
     nk.storageWrite([{
-        collection: "system_config",
-        key: "arena_list",
-        userId: "00000000-0000-0000-0000-000000000000",
-        value: ARENA_CONFIG,
-        permissionRead: 2,
-        permissionWrite: 0,
-    }]);
-    return ARENA_CONFIG;
+            collection: "system_config",
+            key: "arena_list",
+            userId: "00000000-0000-0000-0000-000000000000",
+            value: defaults,
+            permissionRead: 2,
+            permissionWrite: 0,
+        }]);
+    return defaults;
 }
 function readArenaOffers(nk) {
     var result = nk.storageRead([{
