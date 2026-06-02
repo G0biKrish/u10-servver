@@ -7,5 +7,5 @@ COPY ./nakama_modules /nakama/data/modules/
 # Expose Nakama ports
 EXPOSE 7349 7350 7351
 
-# Run migrations and start Nakama using Render's automatically injected DATABASE_URL
-CMD ["/bin/sh", "-ec", "/nakama/nakama migrate up --database.address $DATABASE_URL && exec /nakama/nakama --database.address $DATABASE_URL --runtime.js_entrypoint index.js --logger.level info --session.token_expiry_sec 7200"]
+# Run migrations and start Nakama using Render's DATABASE_URL or INTERNAL_DATABASE_URL
+CMD DB_URL=${DATABASE_URL:-$INTERNAL_DATABASE_URL} && /nakama/nakama migrate up --database.address $DB_URL && exec /nakama/nakama --database.address $DB_URL --runtime.js_entrypoint index.js --logger.level info --session.token_expiry_sec 7200
