@@ -1,5 +1,5 @@
-# Use the official Nakama image matching local version
-FROM registry.heroiclabs.com/heroiclabs/nakama:3.22.0
+# Use the official Nakama image from Docker Hub to avoid registry rate limits
+FROM heroiclabs/nakama:3.22.0
 
 # Copy pre-bundled JS runtime and defaults into the modules directory
 COPY ./nakama_modules /nakama/data/modules/
