@@ -67,7 +67,7 @@
     "jackpot": 50000,
     "tier_label": "JACKPOT",
     "shield_image": "",
-    "height_variant": "standard"
+    "height_variant": "tall"
   },
   "platinum": {
     "name": "DIAMOND LEAGUE",
