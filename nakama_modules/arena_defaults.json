@@ -11,7 +11,9 @@
     "jackpot": 0,
     "tier_label": "",
     "shield_image": "",
-    "height_variant": "standard"
+    "height_variant": "standard",
+    "glow_enabled": false,
+    "glow_color": ""
   },
   "starter": {
     "name": "WOODEN LEAGUE",
@@ -25,7 +27,9 @@
     "jackpot": 0,
     "tier_label": "",
     "shield_image": "",
-    "height_variant": "standard"
+    "height_variant": "standard",
+    "glow_enabled": false,
+    "glow_color": ""
   },
   "bronze": {
     "name": "IRON FORGE",
@@ -39,7 +43,9 @@
     "jackpot": 0,
     "tier_label": "",
     "shield_image": "",
-    "height_variant": "standard"
+    "height_variant": "standard",
+    "glow_enabled": false,
+    "glow_color": ""
   },
   "silver": {
     "name": "SILVER LEAGUE",
@@ -53,7 +59,9 @@
     "jackpot": 0,
     "tier_label": "",
     "shield_image": "",
-    "height_variant": "standard"
+    "height_variant": "standard",
+    "glow_enabled": false,
+    "glow_color": ""
   },
   "gold": {
     "name": "DIAMOND LOUNGE",
@@ -67,7 +75,9 @@
     "jackpot": 50000,
     "tier_label": "JACKPOT",
     "shield_image": "",
-    "height_variant": "tall"
+    "height_variant": "tall",
+    "glow_enabled": true,
+    "glow_color": "#ff3b80"
   },
   "platinum": {
     "name": "DIAMOND LEAGUE",
@@ -81,6 +91,8 @@
     "jackpot": 0,
     "tier_label": "ENTRY FEE",
     "shield_image": "",
-    "height_variant": "standard"
+    "height_variant": "standard",
+    "glow_enabled": true,
+    "glow_color": "#ffd700"
   }
 }
