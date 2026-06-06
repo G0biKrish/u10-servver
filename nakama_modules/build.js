@@ -6,6 +6,7 @@ const economyJs = fs.readFileSync(path.join(__dirname, 'economy.js'), 'utf8');
 const seasonalJs = fs.readFileSync(path.join(__dirname, 'seasonal.js'), 'utf8');
 const legalJs = fs.readFileSync(path.join(__dirname, 'legal_defaults.js'), 'utf8');
 const friendsJs = fs.readFileSync(path.join(__dirname, 'friends.js'), 'utf8');
+const matchmakingJs = fs.readFileSync(path.join(__dirname, 'matchmaking.js'), 'utf8');
 
 function stripInitModule(content) {
   const marker = 'function InitModule(';
@@ -23,6 +24,7 @@ const escapedDefaults = JSON.stringify(JSON.parse(arenaDefaults));
 const cleanEconomy = cleanEconomyRaw.replace('/*ARENA_DEFAULTS_PLACEHOLDER*/', escapedDefaults);
 const cleanSeasonal = stripInitModule(seasonalJs);
 const cleanFriends = stripInitModule(friendsJs);
+const cleanMatchmaking = stripInitModule(matchmakingJs);
 
 const combinedInitModule = `
 // ─────────────────────────────────────────────────────────────────────────────
@@ -71,7 +73,13 @@ function InitModule(ctx, logger, nk, initializer) {
   // Friends Module RPCs
   initializer.registerRpc("search_user_by_username", searchUserByUsernameRpc);
 
+  // Matchmaking Module RPCs
+  initializer.registerRpc("join_matchmaking_queue", joinMatchmakingQueueRpc);
+  initializer.registerRpc("escalate_matchmaking",   escalateMatchmakingRpc);
+  initializer.registerRpc("cancel_matchmaking",     cancelMatchmakingRpc);
+
   logger.info("[Economy] Economy module loaded successfully.");
+  logger.info("[Matchmaking] Matchmaking module loaded successfully.");
   logger.info("[Seasonal] Seasonal module loaded successfully.");
   logger.info("[Friends] Friends module loaded successfully.");
   logger.info("[Runtime] All U10 modules initialized successfully.");
@@ -108,6 +116,11 @@ ${cleanSeasonal}
 // FRIENDS DOMAIN
 // ─────────────────────────────────────────────────────────────────────────────
 ${cleanFriends}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MATCHMAKING DOMAIN
+// ─────────────────────────────────────────────────────────────────────────────
+${cleanMatchmaking}
 ${combinedInitModule}
 `;
 
