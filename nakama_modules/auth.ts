@@ -205,11 +205,13 @@ function beforeAuthenticateEmail(
 ): nkruntime.AuthenticateEmailRequest | null {
   const email = data.account?.email;
   if (email && email.endsWith("@u10game.internal")) {
-    const consoleUsername = ctx.env["CONSOLE_USERNAME"] || "admin";
-    const consolePassword = ctx.env["CONSOLE_PASSWORD"] || "defaultpassword";
+    const consoleUsername = (ctx.env["CONSOLE_USERNAME"] || "admin").trim();
+    const consolePassword = (ctx.env["CONSOLE_PASSWORD"] || "defaultpassword").trim();
 
     const username = email.split("@")[0];
     const password = data.account?.password;
+
+    logger.info(`[Auth] Config Portal Login - Username: "${username}" (expected: "${consoleUsername}"), Password Length: ${password ? password.length : 0} (expected: ${consolePassword.length})`);
 
     if (username !== consoleUsername || password !== consolePassword) {
       logger.warn(`[Auth] Config Portal access denied for email: ${email}`);
