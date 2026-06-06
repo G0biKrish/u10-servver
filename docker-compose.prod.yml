@@ -23,7 +23,7 @@ services:
         --console.password "${CONSOLE_PASSWORD:-password}"
         --runtime.env "CONSOLE_USERNAME=${CONSOLE_USERNAME:-admin}"
         --runtime.env "CONSOLE_PASSWORD=${CONSOLE_PASSWORD:-password}"
-        --session.server_key "${SERVER_KEY:-ChickenThokkuBriyani}"
+        --socket.server_key "${SERVER_KEY:-ChickenThokkuBriyani}"
     volumes:
       - ./nakama_modules:/nakama/data/modules
     ports:

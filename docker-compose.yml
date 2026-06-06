@@ -25,7 +25,7 @@ services:
     entrypoint:
       - "/bin/sh"
       - "-ec"
-      - "/nakama/nakama migrate up --database.address nakama:local_db_pass@postgres:5432/nakama?sslmode=disable && exec /nakama/nakama --database.address nakama:local_db_pass@postgres:5432/nakama?sslmode=disable --logger.level info --session.token_expiry_sec 7200 --runtime.js_entrypoint index.js --session.server_key ChickenThokkuBriyani"
+      - "/nakama/nakama migrate up --database.address nakama:local_db_pass@postgres:5432/nakama?sslmode=disable && exec /nakama/nakama --database.address nakama:local_db_pass@postgres:5432/nakama?sslmode=disable --logger.level info --session.token_expiry_sec 7200 --runtime.js_entrypoint index.js --socket.server_key ChickenThokkuBriyani"
     restart: always
     links:
       - postgres
