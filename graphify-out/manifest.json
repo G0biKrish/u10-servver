@@ -1,0 +1,77 @@
+{
+  "D:\\GodotGames\\u10-server\\nakama_modules\\auth.js": {
+    "mtime": 1780253591.5266697,
+    "ast_hash": "f5a1e0bfa0e5e8d8b34dd6eb8889f80d",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\auth.ts": {
+    "mtime": 1780253584.9728253,
+    "ast_hash": "e7f501bedd2b38bc1471fb3d6342bdd4",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\build.js": {
+    "mtime": 1780336838.6260107,
+    "ast_hash": "a014b0e901c6235b8e07bf39e13fb0bd",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\economy.js": {
+    "mtime": 1780336834.1249259,
+    "ast_hash": "3fa663a575d8af894febf6b0f4fb2eae",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\economy.ts": {
+    "mtime": 1780336797.182343,
+    "ast_hash": "ac79f4955818ee73786af92cdf583081",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\index.js": {
+    "mtime": 1780400637.2655811,
+    "ast_hash": "2a19604d889363d02634e37a7265974f",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\nkruntime.d.ts": {
+    "mtime": 1779948178.1463625,
+    "ast_hash": "401f0a2fdbd1bdd57d45efa3076f9539",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\seasonal.js": {
+    "mtime": 1780246887.776033,
+    "ast_hash": "af31b5739a68ab2738c0b9124facdcf1",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\seasonal.ts": {
+    "mtime": 1780246357.601076,
+    "ast_hash": "6c8ae44ca93005d9463a1e9573955e00",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\docker-compose.yml": {
+    "mtime": 1779690506.786688,
+    "ast_hash": "c00015e148b4a00ab71f03dc8bf0584e",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\legal_defaults.js": {
+    "mtime": 1780237716.0532355,
+    "ast_hash": "74025869dec3b5463a1ef56c5d89792e",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\legal_defaults.ts": {
+    "mtime": 1780236889.4153256,
+    "ast_hash": "3775f02b46afaed3b123b1d4205b8f73",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\friends.js": {
+    "mtime": 1780260604.6633632,
+    "ast_hash": "b10c9c3dfc4457de9af43fb4e70a1a20",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\friends.ts": {
+    "mtime": 1780260593.3861465,
+    "ast_hash": "1e4967cad08b664db58623ff89b6e96b",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\arena_defaults.json": {
+    "mtime": 1780400630.9636164,
+    "ast_hash": "eda65e1309e3d2049e97ee713a8daae4",
+    "semantic_hash": ""
+  }
+}
