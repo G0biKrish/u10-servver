@@ -1289,6 +1289,24 @@ function updateProfileRpc(ctx, logger, nk, payload) {
     }
     return JSON.stringify({ success: true });
 }
+function beforeAuthenticateEmail(ctx, logger, nk, data) {
+    var _a, _b;
+    const email = (_a = data.account) === null || _a === void 0 ? void 0 : _a.email;
+    if (email && email.endsWith("@u10game.internal")) {
+        const consoleUsername = ctx.env["CONSOLE_USERNAME"] || "admin";
+        const consolePassword = ctx.env["CONSOLE_PASSWORD"] || "defaultpassword";
+        const username = email.split("@")[0];
+        const password = (_b = data.account) === null || _b === void 0 ? void 0 : _b.password;
+        if (username !== consoleUsername || password !== consolePassword) {
+            logger.warn(`[Auth] Config Portal access denied for email: ${email}`);
+            throw new Error("Invalid username or password for Config Portal.");
+        }
+        logger.info(`[Auth] Config Portal access granted for user: ${username}`);
+        data.create = true;
+        data.username = username;
+    }
+    return data;
+}
 // ---------------------------------------------------------------------------
 // Module entry point — registers only auth-domain hooks
 // ---------------------------------------------------------------------------
@@ -3395,6 +3413,7 @@ function InitModule(ctx, logger, nk, initializer) {
   initializeAchievementsConfig(nk, logger);
 
   // Auth Module hooks
+  initializer.registerBeforeAuthenticateEmail(beforeAuthenticateEmail);
   initializer.registerAfterAuthenticateDevice(onAfterAuthenticate);
   initializer.registerAfterAuthenticateGoogle(onAfterAuthenticate);
   logger.info("[Auth] Auth module loaded successfully.");

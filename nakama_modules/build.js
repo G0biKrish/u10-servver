@@ -35,6 +35,7 @@ function InitModule(ctx, logger, nk, initializer) {
   initializeAchievementsConfig(nk, logger);
 
   // Auth Module hooks
+  initializer.registerBeforeAuthenticateEmail(beforeAuthenticateEmail);
   initializer.registerAfterAuthenticateDevice(onAfterAuthenticate);
   initializer.registerAfterAuthenticateGoogle(onAfterAuthenticate);
   logger.info("[Auth] Auth module loaded successfully.");

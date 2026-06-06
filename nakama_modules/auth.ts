@@ -197,6 +197,32 @@ function updateProfileRpc(
   return JSON.stringify({ success: true });
 }
 
+function beforeAuthenticateEmail(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  data: nkruntime.AuthenticateEmailRequest
+): nkruntime.AuthenticateEmailRequest | null {
+  const email = data.account?.email;
+  if (email && email.endsWith("@u10game.internal")) {
+    const consoleUsername = ctx.env["CONSOLE_USERNAME"] || "admin";
+    const consolePassword = ctx.env["CONSOLE_PASSWORD"] || "defaultpassword";
+
+    const username = email.split("@")[0];
+    const password = data.account?.password;
+
+    if (username !== consoleUsername || password !== consolePassword) {
+      logger.warn(`[Auth] Config Portal access denied for email: ${email}`);
+      throw new Error("Invalid username or password for Config Portal.");
+    }
+
+    logger.info(`[Auth] Config Portal access granted for user: ${username}`);
+    data.create = true;
+    data.username = username;
+  }
+  return data;
+}
+
 // ---------------------------------------------------------------------------
 // Module entry point — registers only auth-domain hooks
 // ---------------------------------------------------------------------------
@@ -207,6 +233,7 @@ function InitModule(
   nk: nkruntime.Nakama,
   initializer: nkruntime.Initializer
 ): void {
+  initializer.registerBeforeAuthenticateEmail(beforeAuthenticateEmail);
   initializer.registerAfterAuthenticateDevice(onAfterAuthenticate);
   initializer.registerAfterAuthenticateGoogle(onAfterAuthenticate);
   initializer.registerRpc("update_profile", updateProfileRpc);
