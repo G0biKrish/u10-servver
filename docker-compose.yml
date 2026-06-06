@@ -14,7 +14,7 @@ services:
     expose:
       - "5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nakama -d nakama"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-nakama} -d $${POSTGRES_DB:-nakama}"]
       interval: 3s
       timeout: 3s
       retries: 5
@@ -39,7 +39,7 @@ services:
       - "7350:7350"
       - "7351:7351"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7350/"]
+      test: ["CMD", "/nakama/nakama", "healthcheck"]
       interval: 10s
       timeout: 5s
       retries: 5
