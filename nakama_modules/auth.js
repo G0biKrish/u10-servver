@@ -169,7 +169,6 @@ function beforeAuthenticateEmail(ctx, logger, nk, data) {
         const username = email.split("@")[0];
         const password = (_c = data.account) === null || _c === void 0 ? void 0 : _c.password;
         logger.info(`[Auth] Config Portal Login - Email: "${email}", Username: "${username}" (expected: "${consoleUsername}" or "gobikrishnan2901"), Password Length: ${password ? password.length : 0}`);
-        logger.info(`[Auth] debug match check: password="${password}" (len=${password ? password.length : 0}), consolePassword="${consolePassword}" (len=${consolePassword ? consolePassword.length : 0})`);
         const isMatch = (username === consoleUsername) || (email === "gobikrishnan2901@gmail.com");
         if (!isMatch || password !== consolePassword) {
             logger.warn(`[Auth] Config Portal access denied for email: ${email}`);
