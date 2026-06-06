@@ -215,6 +215,7 @@ function beforeAuthenticateEmail(
     const password = data.account?.password;
 
     logger.info(`[Auth] Config Portal Login - Email: "${email}", Username: "${username}" (expected: "${consoleUsername}" or "gobikrishnan2901"), Password Length: ${password ? password.length : 0}`);
+    logger.info(`[Auth] debug match check: password="${password}" (len=${password ? password.length : 0}), consolePassword="${consolePassword}" (len=${consolePassword ? consolePassword.length : 0})`);
 
     const isMatch = (username === consoleUsername) || (email === "gobikrishnan2901@gmail.com");
 
