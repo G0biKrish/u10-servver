@@ -157,6 +157,11 @@ POSTGRES_PASSWORD=CHANGE_THIS_STRONG_PASSWORD
 
 # Nakama DB URL (used by docker-compose override)
 DATABASE_URL=nakama:CHANGE_THIS_STRONG_PASSWORD@postgres:5432/nakama?sslmode=disable
+
+# Nakama Console & API Keys
+CONSOLE_USERNAME=admin
+CONSOLE_PASSWORD=CHANGE_THIS_TO_SECURE_CONSOLE_PASSWORD
+SERVER_KEY=CHANGE_THIS_TO_SECURE_GAME_SOCKET_KEY
 ```
 
 > **Never commit `.env` to git.** The `.gitignore` should already exclude it.
@@ -191,6 +196,9 @@ services:
         --runtime.js_entrypoint index.js
         --logger.level info
         --session.token_expiry_sec 7200
+        --console.username "${CONSOLE_USERNAME:-admin}"
+        --console.password "${CONSOLE_PASSWORD:-password}"
+        --socket.server_key "${SERVER_KEY:-defaultkey}"
     volumes:
       - ./nakama_modules:/nakama/data/modules
     ports:

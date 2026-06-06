@@ -19,6 +19,9 @@ services:
         --runtime.js_entrypoint index.js
         --logger.level info
         --session.token_expiry_sec 7200
+        --console.username "${CONSOLE_USERNAME:-admin}"
+        --console.password "${CONSOLE_PASSWORD:-password}"
+        --socket.server_key "${SERVER_KEY:-defaultkey}"
     volumes:
       - ./nakama_modules:/nakama/data/modules
     ports:
