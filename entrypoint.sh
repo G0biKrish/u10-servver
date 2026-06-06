@@ -17,4 +17,5 @@ exec /nakama/nakama \
   --database.address "$DB_URL" \
   --runtime.js_entrypoint index.js \
   --logger.level info \
-  --session.token_expiry_sec 7200
+  --session.token_expiry_sec 7200 \
+  --session.server_key ChickenThokkuBriyani
