@@ -159,15 +159,18 @@ function updateProfileRpc(ctx, logger, nk, payload) {
     return JSON.stringify({ success: true });
 }
 function beforeAuthenticateEmail(ctx, logger, nk, data) {
-    var _a, _b;
+    var _a, _b, _c;
     const email = (_a = data.account) === null || _a === void 0 ? void 0 : _a.email;
-    if (email && email.endsWith("@u10game.internal")) {
+    const vars = (_b = data.account) === null || _b === void 0 ? void 0 : _b.vars;
+    const isConfigPortal = (vars && vars["config_portal"] === "true") || (email && email.endsWith("@u10game.internal"));
+    if (email && isConfigPortal) {
         const consoleUsername = (ctx.env["CONSOLE_USERNAME"] || "admin").trim();
         const consolePassword = (ctx.env["CONSOLE_PASSWORD"] || "defaultpassword").trim();
         const username = email.split("@")[0];
-        const password = (_b = data.account) === null || _b === void 0 ? void 0 : _b.password;
-        logger.info(`[Auth] Config Portal Login - Username: "${username}" (expected: "${consoleUsername}"), Password Length: ${password ? password.length : 0} (expected: ${consolePassword.length})`);
-        if (username !== consoleUsername || password !== consolePassword) {
+        const password = (_c = data.account) === null || _c === void 0 ? void 0 : _c.password;
+        logger.info(`[Auth] Config Portal Login - Email: "${email}", Username: "${username}" (expected: "${consoleUsername}" or "gobikrishnan2901"), Password Length: ${password ? password.length : 0}`);
+        const isMatch = (username === consoleUsername) || (email === "gobikrishnan2901@gmail.com");
+        if (!isMatch || password !== consolePassword) {
             logger.warn(`[Auth] Config Portal access denied for email: ${email}`);
             throw new Error("Invalid username or password for Config Portal.");
         }

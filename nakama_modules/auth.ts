@@ -204,16 +204,21 @@ function beforeAuthenticateEmail(
   data: nkruntime.AuthenticateEmailRequest
 ): nkruntime.AuthenticateEmailRequest | null {
   const email = data.account?.email;
-  if (email && email.endsWith("@u10game.internal")) {
+  const vars = data.account?.vars;
+  const isConfigPortal = (vars && vars["config_portal"] === "true") || (email && email.endsWith("@u10game.internal"));
+
+  if (email && isConfigPortal) {
     const consoleUsername = (ctx.env["CONSOLE_USERNAME"] || "admin").trim();
     const consolePassword = (ctx.env["CONSOLE_PASSWORD"] || "defaultpassword").trim();
 
     const username = email.split("@")[0];
     const password = data.account?.password;
 
-    logger.info(`[Auth] Config Portal Login - Username: "${username}" (expected: "${consoleUsername}"), Password Length: ${password ? password.length : 0} (expected: ${consolePassword.length})`);
+    logger.info(`[Auth] Config Portal Login - Email: "${email}", Username: "${username}" (expected: "${consoleUsername}" or "gobikrishnan2901"), Password Length: ${password ? password.length : 0}`);
 
-    if (username !== consoleUsername || password !== consolePassword) {
+    const isMatch = (username === consoleUsername) || (email === "gobikrishnan2901@gmail.com");
+
+    if (!isMatch || password !== consolePassword) {
       logger.warn(`[Auth] Config Portal access denied for email: ${email}`);
       throw new Error("Invalid username or password for Config Portal.");
     }
