@@ -1,0 +1,38 @@
+name: Deploy Nakama to Oracle VM
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # Allow manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    name: SSH Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Oracle VM via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_HOST }}
+          username: ${{ secrets.ORACLE_USER }}
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          port: ${{ secrets.ORACLE_PORT }}
+          script: |
+            set -e
+            cd ~/u10-server
+
+            echo "=== Pulling latest code ==="
+            git pull origin main
+
+            echo "=== Rebuilding and restarting Nakama ==="
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --remove-orphans
+
+            echo "=== Pruning old images ==="
+            docker image prune -f
+
+            echo "=== Deploy complete ==="
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml ps

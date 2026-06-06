@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  postgres:
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: always
+
+  nakama:
+    image: heroiclabs/nakama:3.22.0
+    entrypoint:
+      - "/bin/sh"
+      - "-ec"
+      - >
+        /nakama/nakama migrate up --database.address "${DATABASE_URL}" &&
+        exec /nakama/nakama
+        --database.address "${DATABASE_URL}"
+        --runtime.js_entrypoint index.js
+        --logger.level info
+        --session.token_expiry_sec 7200
+    volumes:
+      - ./nakama_modules:/nakama/data/modules
+    restart: always
+    env_file:
+      - .env

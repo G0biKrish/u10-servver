@@ -1,0 +1,15 @@
+# Environment secrets — NEVER commit
+.env
+.env.local
+.env.production
+
+# Docker local data
+postgres_data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
