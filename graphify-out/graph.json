@@ -35,7 +35,7 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L1",
       "id": "nakama_modules_arena_defaults_json",
-      "community": 5,
+      "community": 11,
       "norm_label": "arena_defaults.json"
     },
     {
@@ -44,7 +44,7 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L2",
       "id": "nakama_modules_arena_defaults_table_config",
-      "community": 5,
+      "community": 11,
       "norm_label": "table_config"
     },
     {
@@ -53,7 +53,7 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L3",
       "id": "nakama_modules_arena_defaults_table_config_public_max_players",
-      "community": 5,
+      "community": 11,
       "norm_label": "public_max_players"
     },
     {
@@ -62,7 +62,7 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L4",
       "id": "nakama_modules_arena_defaults_table_config_private_max_players",
-      "community": 5,
+      "community": 11,
       "norm_label": "private_max_players"
     },
     {
@@ -71,7 +71,7 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L5",
       "id": "nakama_modules_arena_defaults_table_config_private_create_cost",
-      "community": 5,
+      "community": 11,
       "norm_label": "private_create_cost"
     },
     {
@@ -80,7 +80,7 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L6",
       "id": "nakama_modules_arena_defaults_table_config_elimination_points",
-      "community": 5,
+      "community": 11,
       "norm_label": "elimination_points"
     },
     {
@@ -219,10 +219,19 @@
       "norm_label": "glow_color"
     },
     {
+      "label": "arena_type",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L23",
+      "id": "nakama_modules_arena_defaults_practice_arena_type",
+      "community": 11,
+      "norm_label": "arena_type"
+    },
+    {
       "label": "starter",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L24",
+      "source_location": "L25",
       "id": "nakama_modules_arena_defaults_starter",
       "community": 16,
       "norm_label": "starter"
@@ -231,7 +240,7 @@
       "label": "name",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L25",
+      "source_location": "L26",
       "id": "nakama_modules_arena_defaults_starter_name",
       "community": 16,
       "norm_label": "name"
@@ -240,7 +249,7 @@
       "label": "badge",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L26",
+      "source_location": "L27",
       "id": "nakama_modules_arena_defaults_starter_badge",
       "community": 16,
       "norm_label": "badge"
@@ -249,7 +258,7 @@
       "label": "badge_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L27",
+      "source_location": "L28",
       "id": "nakama_modules_arena_defaults_starter_badge_color",
       "community": 16,
       "norm_label": "badge_color"
@@ -258,7 +267,7 @@
       "label": "entry_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L28",
+      "source_location": "L29",
       "id": "nakama_modules_arena_defaults_starter_entry_fee",
       "community": 16,
       "norm_label": "entry_fee"
@@ -267,7 +276,7 @@
       "label": "offer_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L29",
+      "source_location": "L30",
       "id": "nakama_modules_arena_defaults_starter_offer_fee",
       "community": 16,
       "norm_label": "offer_fee"
@@ -276,7 +285,7 @@
       "label": "desc",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L30",
+      "source_location": "L31",
       "id": "nakama_modules_arena_defaults_starter_desc",
       "community": 16,
       "norm_label": "desc"
@@ -285,7 +294,7 @@
       "label": "gradient",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "id": "nakama_modules_arena_defaults_starter_gradient",
       "community": 16,
       "norm_label": "gradient"
@@ -294,7 +303,7 @@
       "label": "order",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "id": "nakama_modules_arena_defaults_starter_order",
       "community": 16,
       "norm_label": "order"
@@ -303,7 +312,7 @@
       "label": "jackpot",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "id": "nakama_modules_arena_defaults_starter_jackpot",
       "community": 16,
       "norm_label": "jackpot"
@@ -312,7 +321,7 @@
       "label": "tier_label",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L34",
+      "source_location": "L35",
       "id": "nakama_modules_arena_defaults_starter_tier_label",
       "community": 16,
       "norm_label": "tier_label"
@@ -321,7 +330,7 @@
       "label": "shield_image",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L35",
+      "source_location": "L36",
       "id": "nakama_modules_arena_defaults_starter_shield_image",
       "community": 16,
       "norm_label": "shield_image"
@@ -330,7 +339,7 @@
       "label": "height_variant",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L36",
+      "source_location": "L37",
       "id": "nakama_modules_arena_defaults_starter_height_variant",
       "community": 16,
       "norm_label": "height_variant"
@@ -339,7 +348,7 @@
       "label": "glow_enabled",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L37",
+      "source_location": "L38",
       "id": "nakama_modules_arena_defaults_starter_glow_enabled",
       "community": 16,
       "norm_label": "glow_enabled"
@@ -348,16 +357,25 @@
       "label": "glow_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L38",
+      "source_location": "L39",
       "id": "nakama_modules_arena_defaults_starter_glow_color",
       "community": 16,
       "norm_label": "glow_color"
     },
     {
-      "label": "bronze",
+      "label": "arena_type",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L40",
+      "id": "nakama_modules_arena_defaults_starter_arena_type",
+      "community": 16,
+      "norm_label": "arena_type"
+    },
+    {
+      "label": "bronze",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L42",
       "id": "nakama_modules_arena_defaults_bronze",
       "community": 4,
       "norm_label": "bronze"
@@ -366,7 +384,7 @@
       "label": "name",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L41",
+      "source_location": "L43",
       "id": "nakama_modules_arena_defaults_bronze_name",
       "community": 4,
       "norm_label": "name"
@@ -375,7 +393,7 @@
       "label": "badge",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L42",
+      "source_location": "L44",
       "id": "nakama_modules_arena_defaults_bronze_badge",
       "community": 4,
       "norm_label": "badge"
@@ -384,7 +402,7 @@
       "label": "badge_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L43",
+      "source_location": "L45",
       "id": "nakama_modules_arena_defaults_bronze_badge_color",
       "community": 4,
       "norm_label": "badge_color"
@@ -393,7 +411,7 @@
       "label": "entry_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L44",
+      "source_location": "L46",
       "id": "nakama_modules_arena_defaults_bronze_entry_fee",
       "community": 4,
       "norm_label": "entry_fee"
@@ -402,7 +420,7 @@
       "label": "offer_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L45",
+      "source_location": "L47",
       "id": "nakama_modules_arena_defaults_bronze_offer_fee",
       "community": 4,
       "norm_label": "offer_fee"
@@ -411,7 +429,7 @@
       "label": "desc",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L46",
+      "source_location": "L48",
       "id": "nakama_modules_arena_defaults_bronze_desc",
       "community": 4,
       "norm_label": "desc"
@@ -420,7 +438,7 @@
       "label": "gradient",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L47",
+      "source_location": "L49",
       "id": "nakama_modules_arena_defaults_bronze_gradient",
       "community": 4,
       "norm_label": "gradient"
@@ -429,7 +447,7 @@
       "label": "order",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L48",
+      "source_location": "L50",
       "id": "nakama_modules_arena_defaults_bronze_order",
       "community": 4,
       "norm_label": "order"
@@ -438,7 +456,7 @@
       "label": "jackpot",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L49",
+      "source_location": "L51",
       "id": "nakama_modules_arena_defaults_bronze_jackpot",
       "community": 4,
       "norm_label": "jackpot"
@@ -447,7 +465,7 @@
       "label": "tier_label",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L50",
+      "source_location": "L52",
       "id": "nakama_modules_arena_defaults_bronze_tier_label",
       "community": 4,
       "norm_label": "tier_label"
@@ -456,7 +474,7 @@
       "label": "shield_image",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L51",
+      "source_location": "L53",
       "id": "nakama_modules_arena_defaults_bronze_shield_image",
       "community": 4,
       "norm_label": "shield_image"
@@ -465,7 +483,7 @@
       "label": "height_variant",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L52",
+      "source_location": "L54",
       "id": "nakama_modules_arena_defaults_bronze_height_variant",
       "community": 4,
       "norm_label": "height_variant"
@@ -474,7 +492,7 @@
       "label": "glow_enabled",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L53",
+      "source_location": "L55",
       "id": "nakama_modules_arena_defaults_bronze_glow_enabled",
       "community": 4,
       "norm_label": "glow_enabled"
@@ -483,286 +501,313 @@
       "label": "glow_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L54",
+      "source_location": "L56",
       "id": "nakama_modules_arena_defaults_bronze_glow_color",
       "community": 4,
       "norm_label": "glow_color"
     },
     {
+      "label": "arena_type",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L57",
+      "id": "nakama_modules_arena_defaults_bronze_arena_type",
+      "community": 4,
+      "norm_label": "arena_type"
+    },
+    {
       "label": "silver",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L56",
+      "source_location": "L59",
       "id": "nakama_modules_arena_defaults_silver",
-      "community": 5,
+      "community": 24,
       "norm_label": "silver"
     },
     {
       "label": "name",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L57",
+      "source_location": "L60",
       "id": "nakama_modules_arena_defaults_silver_name",
-      "community": 5,
+      "community": 24,
       "norm_label": "name"
     },
     {
       "label": "badge",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L58",
+      "source_location": "L61",
       "id": "nakama_modules_arena_defaults_silver_badge",
-      "community": 5,
+      "community": 24,
       "norm_label": "badge"
     },
     {
       "label": "badge_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L59",
+      "source_location": "L62",
       "id": "nakama_modules_arena_defaults_silver_badge_color",
-      "community": 5,
+      "community": 24,
       "norm_label": "badge_color"
     },
     {
       "label": "entry_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L60",
+      "source_location": "L63",
       "id": "nakama_modules_arena_defaults_silver_entry_fee",
-      "community": 5,
+      "community": 24,
       "norm_label": "entry_fee"
     },
     {
       "label": "offer_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L61",
+      "source_location": "L64",
       "id": "nakama_modules_arena_defaults_silver_offer_fee",
-      "community": 5,
+      "community": 24,
       "norm_label": "offer_fee"
     },
     {
       "label": "desc",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L62",
+      "source_location": "L65",
       "id": "nakama_modules_arena_defaults_silver_desc",
-      "community": 5,
+      "community": 24,
       "norm_label": "desc"
     },
     {
       "label": "gradient",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L63",
+      "source_location": "L66",
       "id": "nakama_modules_arena_defaults_silver_gradient",
-      "community": 5,
+      "community": 24,
       "norm_label": "gradient"
     },
     {
       "label": "order",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L64",
+      "source_location": "L67",
       "id": "nakama_modules_arena_defaults_silver_order",
-      "community": 5,
+      "community": 24,
       "norm_label": "order"
     },
     {
       "label": "jackpot",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L65",
+      "source_location": "L68",
       "id": "nakama_modules_arena_defaults_silver_jackpot",
-      "community": 5,
+      "community": 24,
       "norm_label": "jackpot"
     },
     {
       "label": "tier_label",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L66",
+      "source_location": "L69",
       "id": "nakama_modules_arena_defaults_silver_tier_label",
-      "community": 5,
+      "community": 24,
       "norm_label": "tier_label"
     },
     {
       "label": "shield_image",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L67",
+      "source_location": "L70",
       "id": "nakama_modules_arena_defaults_silver_shield_image",
-      "community": 5,
+      "community": 24,
       "norm_label": "shield_image"
     },
     {
       "label": "height_variant",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L68",
+      "source_location": "L71",
       "id": "nakama_modules_arena_defaults_silver_height_variant",
-      "community": 5,
+      "community": 24,
       "norm_label": "height_variant"
     },
     {
       "label": "glow_enabled",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L69",
+      "source_location": "L72",
       "id": "nakama_modules_arena_defaults_silver_glow_enabled",
-      "community": 5,
+      "community": 24,
       "norm_label": "glow_enabled"
     },
     {
       "label": "glow_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L70",
+      "source_location": "L73",
       "id": "nakama_modules_arena_defaults_silver_glow_color",
-      "community": 5,
+      "community": 24,
       "norm_label": "glow_color"
+    },
+    {
+      "label": "arena_type",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L74",
+      "id": "nakama_modules_arena_defaults_silver_arena_type",
+      "community": 24,
+      "norm_label": "arena_type"
     },
     {
       "label": "gold",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L72",
+      "source_location": "L76",
       "id": "nakama_modules_arena_defaults_gold",
-      "community": 18,
+      "community": 11,
       "norm_label": "gold"
     },
     {
       "label": "name",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L73",
+      "source_location": "L77",
       "id": "nakama_modules_arena_defaults_gold_name",
-      "community": 18,
+      "community": 11,
       "norm_label": "name"
     },
     {
       "label": "badge",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L74",
+      "source_location": "L78",
       "id": "nakama_modules_arena_defaults_gold_badge",
-      "community": 18,
+      "community": 11,
       "norm_label": "badge"
     },
     {
       "label": "badge_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L75",
+      "source_location": "L79",
       "id": "nakama_modules_arena_defaults_gold_badge_color",
-      "community": 18,
+      "community": 11,
       "norm_label": "badge_color"
     },
     {
       "label": "entry_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L76",
+      "source_location": "L80",
       "id": "nakama_modules_arena_defaults_gold_entry_fee",
-      "community": 18,
+      "community": 11,
       "norm_label": "entry_fee"
     },
     {
       "label": "offer_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L77",
+      "source_location": "L81",
       "id": "nakama_modules_arena_defaults_gold_offer_fee",
-      "community": 18,
+      "community": 11,
       "norm_label": "offer_fee"
     },
     {
       "label": "desc",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L78",
+      "source_location": "L82",
       "id": "nakama_modules_arena_defaults_gold_desc",
-      "community": 18,
+      "community": 11,
       "norm_label": "desc"
     },
     {
       "label": "gradient",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L79",
+      "source_location": "L83",
       "id": "nakama_modules_arena_defaults_gold_gradient",
-      "community": 18,
+      "community": 11,
       "norm_label": "gradient"
     },
     {
       "label": "order",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L80",
+      "source_location": "L84",
       "id": "nakama_modules_arena_defaults_gold_order",
-      "community": 18,
+      "community": 11,
       "norm_label": "order"
     },
     {
       "label": "jackpot",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L81",
+      "source_location": "L85",
       "id": "nakama_modules_arena_defaults_gold_jackpot",
-      "community": 18,
+      "community": 11,
       "norm_label": "jackpot"
     },
     {
       "label": "tier_label",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L82",
+      "source_location": "L86",
       "id": "nakama_modules_arena_defaults_gold_tier_label",
-      "community": 18,
+      "community": 11,
       "norm_label": "tier_label"
     },
     {
       "label": "shield_image",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L83",
+      "source_location": "L87",
       "id": "nakama_modules_arena_defaults_gold_shield_image",
-      "community": 18,
+      "community": 11,
       "norm_label": "shield_image"
     },
     {
       "label": "height_variant",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L84",
+      "source_location": "L88",
       "id": "nakama_modules_arena_defaults_gold_height_variant",
-      "community": 18,
+      "community": 11,
       "norm_label": "height_variant"
     },
     {
       "label": "glow_enabled",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L85",
+      "source_location": "L89",
       "id": "nakama_modules_arena_defaults_gold_glow_enabled",
-      "community": 18,
+      "community": 11,
       "norm_label": "glow_enabled"
     },
     {
       "label": "glow_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L86",
+      "source_location": "L90",
       "id": "nakama_modules_arena_defaults_gold_glow_color",
-      "community": 18,
+      "community": 11,
       "norm_label": "glow_color"
+    },
+    {
+      "label": "arena_type",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L91",
+      "id": "nakama_modules_arena_defaults_gold_arena_type",
+      "community": 11,
+      "norm_label": "arena_type"
     },
     {
       "label": "platinum",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L88",
+      "source_location": "L93",
       "id": "nakama_modules_arena_defaults_platinum",
       "community": 5,
       "norm_label": "platinum"
@@ -771,7 +816,7 @@
       "label": "name",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L89",
+      "source_location": "L94",
       "id": "nakama_modules_arena_defaults_platinum_name",
       "community": 5,
       "norm_label": "name"
@@ -780,7 +825,7 @@
       "label": "badge",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L90",
+      "source_location": "L95",
       "id": "nakama_modules_arena_defaults_platinum_badge",
       "community": 5,
       "norm_label": "badge"
@@ -789,7 +834,7 @@
       "label": "badge_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L91",
+      "source_location": "L96",
       "id": "nakama_modules_arena_defaults_platinum_badge_color",
       "community": 5,
       "norm_label": "badge_color"
@@ -798,7 +843,7 @@
       "label": "entry_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L92",
+      "source_location": "L97",
       "id": "nakama_modules_arena_defaults_platinum_entry_fee",
       "community": 5,
       "norm_label": "entry_fee"
@@ -807,7 +852,7 @@
       "label": "offer_fee",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L93",
+      "source_location": "L98",
       "id": "nakama_modules_arena_defaults_platinum_offer_fee",
       "community": 5,
       "norm_label": "offer_fee"
@@ -816,7 +861,7 @@
       "label": "desc",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L94",
+      "source_location": "L99",
       "id": "nakama_modules_arena_defaults_platinum_desc",
       "community": 5,
       "norm_label": "desc"
@@ -825,7 +870,7 @@
       "label": "gradient",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L95",
+      "source_location": "L100",
       "id": "nakama_modules_arena_defaults_platinum_gradient",
       "community": 5,
       "norm_label": "gradient"
@@ -834,7 +879,7 @@
       "label": "order",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L96",
+      "source_location": "L101",
       "id": "nakama_modules_arena_defaults_platinum_order",
       "community": 5,
       "norm_label": "order"
@@ -843,7 +888,7 @@
       "label": "jackpot",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L97",
+      "source_location": "L102",
       "id": "nakama_modules_arena_defaults_platinum_jackpot",
       "community": 5,
       "norm_label": "jackpot"
@@ -852,7 +897,7 @@
       "label": "tier_label",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L98",
+      "source_location": "L103",
       "id": "nakama_modules_arena_defaults_platinum_tier_label",
       "community": 5,
       "norm_label": "tier_label"
@@ -861,7 +906,7 @@
       "label": "shield_image",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L99",
+      "source_location": "L104",
       "id": "nakama_modules_arena_defaults_platinum_shield_image",
       "community": 5,
       "norm_label": "shield_image"
@@ -870,7 +915,7 @@
       "label": "height_variant",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L100",
+      "source_location": "L105",
       "id": "nakama_modules_arena_defaults_platinum_height_variant",
       "community": 5,
       "norm_label": "height_variant"
@@ -879,7 +924,7 @@
       "label": "glow_enabled",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L101",
+      "source_location": "L106",
       "id": "nakama_modules_arena_defaults_platinum_glow_enabled",
       "community": 5,
       "norm_label": "glow_enabled"
@@ -888,10 +933,163 @@
       "label": "glow_color",
       "file_type": "code",
       "source_file": "nakama_modules/arena_defaults.json",
-      "source_location": "L102",
+      "source_location": "L107",
       "id": "nakama_modules_arena_defaults_platinum_glow_color",
       "community": 5,
       "norm_label": "glow_color"
+    },
+    {
+      "label": "arena_type",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L108",
+      "id": "nakama_modules_arena_defaults_platinum_arena_type",
+      "community": 5,
+      "norm_label": "arena_type"
+    },
+    {
+      "label": "private_table",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L110",
+      "id": "nakama_modules_arena_defaults_private_table",
+      "community": 18,
+      "norm_label": "private_table"
+    },
+    {
+      "label": "name",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L111",
+      "id": "nakama_modules_arena_defaults_private_table_name",
+      "community": 18,
+      "norm_label": "name"
+    },
+    {
+      "label": "badge",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L112",
+      "id": "nakama_modules_arena_defaults_private_table_badge",
+      "community": 18,
+      "norm_label": "badge"
+    },
+    {
+      "label": "badge_color",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L113",
+      "id": "nakama_modules_arena_defaults_private_table_badge_color",
+      "community": 18,
+      "norm_label": "badge_color"
+    },
+    {
+      "label": "entry_fee",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L114",
+      "id": "nakama_modules_arena_defaults_private_table_entry_fee",
+      "community": 18,
+      "norm_label": "entry_fee"
+    },
+    {
+      "label": "offer_fee",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L115",
+      "id": "nakama_modules_arena_defaults_private_table_offer_fee",
+      "community": 18,
+      "norm_label": "offer_fee"
+    },
+    {
+      "label": "desc",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L116",
+      "id": "nakama_modules_arena_defaults_private_table_desc",
+      "community": 18,
+      "norm_label": "desc"
+    },
+    {
+      "label": "gradient",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L117",
+      "id": "nakama_modules_arena_defaults_private_table_gradient",
+      "community": 18,
+      "norm_label": "gradient"
+    },
+    {
+      "label": "order",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L118",
+      "id": "nakama_modules_arena_defaults_private_table_order",
+      "community": 18,
+      "norm_label": "order"
+    },
+    {
+      "label": "jackpot",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L119",
+      "id": "nakama_modules_arena_defaults_private_table_jackpot",
+      "community": 18,
+      "norm_label": "jackpot"
+    },
+    {
+      "label": "tier_label",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L120",
+      "id": "nakama_modules_arena_defaults_private_table_tier_label",
+      "community": 18,
+      "norm_label": "tier_label"
+    },
+    {
+      "label": "shield_image",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L121",
+      "id": "nakama_modules_arena_defaults_private_table_shield_image",
+      "community": 18,
+      "norm_label": "shield_image"
+    },
+    {
+      "label": "height_variant",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L122",
+      "id": "nakama_modules_arena_defaults_private_table_height_variant",
+      "community": 18,
+      "norm_label": "height_variant"
+    },
+    {
+      "label": "glow_enabled",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L123",
+      "id": "nakama_modules_arena_defaults_private_table_glow_enabled",
+      "community": 18,
+      "norm_label": "glow_enabled"
+    },
+    {
+      "label": "glow_color",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L124",
+      "id": "nakama_modules_arena_defaults_private_table_glow_color",
+      "community": 18,
+      "norm_label": "glow_color"
+    },
+    {
+      "label": "arena_type",
+      "file_type": "code",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L125",
+      "id": "nakama_modules_arena_defaults_private_table_arena_type",
+      "community": 18,
+      "norm_label": "arena_type"
     },
     {
       "label": "auth.js",
@@ -3865,6 +4063,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_json",
+      "target": "nakama_modules_arena_defaults_private_table",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L44",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -3887,9 +4095,9 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_arena_defaults_json",
-      "target": "nakama_modules_arena_defaults_table_config",
-      "confidence_score": 1.0
+      "target": "nakama_modules_arena_defaults_table_config"
     },
     {
       "relation": "contains",
@@ -3897,9 +4105,9 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_arena_defaults_table_config",
-      "target": "nakama_modules_arena_defaults_table_config_elimination_points",
-      "confidence_score": 1.0
+      "target": "nakama_modules_arena_defaults_table_config_elimination_points"
     },
     {
       "relation": "contains",
@@ -3907,9 +4115,9 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_arena_defaults_table_config",
-      "target": "nakama_modules_arena_defaults_table_config_private_create_cost",
-      "confidence_score": 1.0
+      "target": "nakama_modules_arena_defaults_table_config_private_create_cost"
     },
     {
       "relation": "contains",
@@ -3917,9 +4125,9 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_arena_defaults_table_config",
-      "target": "nakama_modules_arena_defaults_table_config_private_max_players",
-      "confidence_score": 1.0
+      "target": "nakama_modules_arena_defaults_table_config_private_max_players"
     },
     {
       "relation": "contains",
@@ -3927,8 +4135,18 @@
       "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_arena_defaults_table_config",
-      "target": "nakama_modules_arena_defaults_table_config_public_max_players",
+      "target": "nakama_modules_arena_defaults_table_config_public_max_players"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_practice",
+      "target": "nakama_modules_arena_defaults_practice_arena_type",
       "confidence_score": 1.0
     },
     {
@@ -4075,6 +4293,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_starter",
+      "target": "nakama_modules_arena_defaults_starter_arena_type",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L18",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4210,6 +4438,16 @@
       "confidence_score": 1.0,
       "source": "nakama_modules_arena_defaults_starter",
       "target": "nakama_modules_arena_defaults_starter_tier_label"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_bronze",
+      "target": "nakama_modules_arena_defaults_bronze_arena_type",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4355,6 +4593,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_silver",
+      "target": "nakama_modules_arena_defaults_silver_arena_type",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L46",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4490,6 +4738,16 @@
       "confidence_score": 1.0,
       "source": "nakama_modules_arena_defaults_silver",
       "target": "nakama_modules_arena_defaults_silver_tier_label"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_gold",
+      "target": "nakama_modules_arena_defaults_gold_arena_type",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -4635,6 +4893,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L108",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_platinum",
+      "target": "nakama_modules_arena_defaults_platinum_arena_type",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
       "source_location": "L74",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -4770,6 +5038,156 @@
       "confidence_score": 1.0,
       "source": "nakama_modules_arena_defaults_platinum",
       "target": "nakama_modules_arena_defaults_platinum_tier_label"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L125",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_arena_type",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_badge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_badge_color",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_desc",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L114",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_entry_fee",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L124",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_glow_color",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L123",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_glow_enabled",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L117",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_gradient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L122",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_height_variant",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L119",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_jackpot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_offer_fee",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L118",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_order",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L121",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_shield_image",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "nakama_modules/arena_defaults.json",
+      "source_location": "L120",
+      "weight": 1.0,
+      "source": "nakama_modules_arena_defaults_private_table",
+      "target": "nakama_modules_arena_defaults_private_table_tier_label",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -5051,9 +5469,9 @@
       "source_file": "nakama_modules/build.js",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_build_js",
-      "target": "nakama_modules_build_cleanprivatetable",
-      "confidence_score": 1.0
+      "target": "nakama_modules_build_cleanprivatetable"
     },
     {
       "relation": "contains",
@@ -5141,9 +5559,9 @@
       "source_file": "nakama_modules/build.js",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_build_js",
-      "target": "nakama_modules_build_privatetablejs",
-      "confidence_score": 1.0
+      "target": "nakama_modules_build_privatetablejs"
     },
     {
       "relation": "contains",
@@ -7195,9 +7613,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3767",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_js",
-      "target": "nakama_modules_index_cancelprivatetablerpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_cancelprivatetablerpc"
     },
     {
       "relation": "contains",
@@ -7275,9 +7693,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3668",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_js",
-      "target": "nakama_modules_index_createprivatetablerpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_createprivatetablerpc"
     },
     {
       "relation": "contains",
@@ -7355,9 +7773,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3629",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_js",
-      "target": "nakama_modules_index_generatetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_generatetablecode"
     },
     {
       "relation": "contains",
@@ -7365,9 +7783,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3639",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_js",
-      "target": "nakama_modules_index_generateuniquetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_generateuniquetablecode"
     },
     {
       "relation": "contains",
@@ -7525,9 +7943,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3658",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_js",
-      "target": "nakama_modules_index_gettableconfigrpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_gettableconfigrpc"
     },
     {
       "relation": "contains",
@@ -7635,9 +8053,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3729",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_js",
-      "target": "nakama_modules_index_joinprivatetablerpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_joinprivatetablerpc"
     },
     {
       "relation": "contains",
@@ -7715,9 +8133,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3604",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_js",
-      "target": "nakama_modules_index_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_readtableconfig"
     },
     {
       "relation": "contains",
@@ -8003,9 +8421,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3687",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_createprivatetablerpc",
-      "target": "nakama_modules_index_readplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_readplayerstats"
     },
     {
       "relation": "calls",
@@ -8124,9 +8542,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3699",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_createprivatetablerpc",
-      "target": "nakama_modules_index_writeplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_writeplayerstats"
     },
     {
       "relation": "calls",
@@ -9169,9 +9587,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3686",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_createprivatetablerpc",
-      "target": "nakama_modules_index_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9180,9 +9598,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3538",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_escalatematchmakingrpc",
-      "target": "nakama_modules_index_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9191,9 +9609,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3662",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_gettableconfigrpc",
-      "target": "nakama_modules_index_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9202,9 +9620,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3488",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_joinmatchmakingqueuerpc",
-      "target": "nakama_modules_index_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9213,9 +9631,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3642",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_generateuniquetablecode",
-      "target": "nakama_modules_index_generatetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_generatetablecode"
     },
     {
       "relation": "calls",
@@ -9224,9 +9642,9 @@
       "source_file": "nakama_modules/index.js",
       "source_location": "L3696",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_index_createprivatetablerpc",
-      "target": "nakama_modules_index_generateuniquetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_index_generateuniquetablecode"
     },
     {
       "relation": "contains",
@@ -9284,9 +9702,9 @@
       "source_file": "nakama_modules/matchmaking.js",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_matchmaking_js",
-      "target": "nakama_modules_matchmaking_js_nakama_modules_matchmaking_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_matchmaking_js_nakama_modules_matchmaking_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9328,9 +9746,9 @@
       "source_file": "nakama_modules/matchmaking.js",
       "source_location": "L126",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_matchmaking_js_nakama_modules_matchmaking_escalatematchmakingrpc",
-      "target": "nakama_modules_matchmaking_js_nakama_modules_matchmaking_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_matchmaking_js_nakama_modules_matchmaking_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9339,9 +9757,9 @@
       "source_file": "nakama_modules/matchmaking.js",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_matchmaking_js_nakama_modules_matchmaking_joinmatchmakingqueuerpc",
-      "target": "nakama_modules_matchmaking_js_nakama_modules_matchmaking_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_matchmaking_js_nakama_modules_matchmaking_readtableconfig"
     },
     {
       "relation": "contains",
@@ -9399,9 +9817,9 @@
       "source_file": "nakama_modules/matchmaking.ts",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_matchmaking_ts",
-      "target": "nakama_modules_matchmaking_ts_nakama_modules_matchmaking_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_matchmaking_ts_nakama_modules_matchmaking_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9443,9 +9861,9 @@
       "source_file": "nakama_modules/matchmaking.ts",
       "source_location": "L143",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_matchmaking_ts_nakama_modules_matchmaking_escalatematchmakingrpc",
-      "target": "nakama_modules_matchmaking_ts_nakama_modules_matchmaking_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_matchmaking_ts_nakama_modules_matchmaking_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9454,9 +9872,9 @@
       "source_file": "nakama_modules/matchmaking.ts",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_matchmaking_ts_nakama_modules_matchmaking_joinmatchmakingqueuerpc",
-      "target": "nakama_modules_matchmaking_ts_nakama_modules_matchmaking_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_matchmaking_ts_nakama_modules_matchmaking_readtableconfig"
     },
     {
       "relation": "contains",
@@ -9514,9 +9932,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L193",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_cancelprivatetablerpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_cancelprivatetablerpc"
     },
     {
       "relation": "contains",
@@ -9524,9 +9942,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_createprivatetablerpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_createprivatetablerpc"
     },
     {
       "relation": "contains",
@@ -9534,9 +9952,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_generatetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_generatetablecode"
     },
     {
       "relation": "contains",
@@ -9544,9 +9962,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_generateuniquetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_generateuniquetablecode"
     },
     {
       "relation": "contains",
@@ -9554,9 +9972,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_gettableconfigrpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_gettableconfigrpc"
     },
     {
       "relation": "contains",
@@ -9564,9 +9982,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L155",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_joinprivatetablerpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_joinprivatetablerpc"
     },
     {
       "relation": "contains",
@@ -9574,9 +9992,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readplayerstats"
     },
     {
       "relation": "contains",
@@ -9584,9 +10002,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readtableconfig"
     },
     {
       "relation": "contains",
@@ -9594,9 +10012,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_writeplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_writeplayerstats"
     },
     {
       "relation": "calls",
@@ -9605,9 +10023,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js_nakama_modules_private_table_createprivatetablerpc",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readplayerstats"
     },
     {
       "relation": "calls",
@@ -9616,9 +10034,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L125",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js_nakama_modules_private_table_createprivatetablerpc",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_writeplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_writeplayerstats"
     },
     {
       "relation": "calls",
@@ -9627,9 +10045,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js_nakama_modules_private_table_createprivatetablerpc",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9638,9 +10056,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js_nakama_modules_private_table_gettableconfigrpc",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9649,9 +10067,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js_nakama_modules_private_table_generateuniquetablecode",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_generatetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_generatetablecode"
     },
     {
       "relation": "calls",
@@ -9660,9 +10078,9 @@
       "source_file": "nakama_modules/private_table.js",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_js_nakama_modules_private_table_createprivatetablerpc",
-      "target": "nakama_modules_private_table_js_nakama_modules_private_table_generateuniquetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_js_nakama_modules_private_table_generateuniquetablecode"
     },
     {
       "relation": "contains",
@@ -9670,9 +10088,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L229",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_cancelprivatetablerpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_cancelprivatetablerpc"
     },
     {
       "relation": "contains",
@@ -9680,9 +10098,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_createprivatetablerpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_createprivatetablerpc"
     },
     {
       "relation": "contains",
@@ -9690,9 +10108,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_generatetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_generatetablecode"
     },
     {
       "relation": "contains",
@@ -9700,9 +10118,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_generateuniquetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_generateuniquetablecode"
     },
     {
       "relation": "contains",
@@ -9710,9 +10128,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_gettableconfigrpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_gettableconfigrpc"
     },
     {
       "relation": "contains",
@@ -9720,9 +10138,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L180",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_joinprivatetablerpc",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_joinprivatetablerpc"
     },
     {
       "relation": "contains",
@@ -9730,9 +10148,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readplayerstats"
     },
     {
       "relation": "contains",
@@ -9740,9 +10158,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readtableconfig"
     },
     {
       "relation": "contains",
@@ -9750,9 +10168,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_writeplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_writeplayerstats"
     },
     {
       "relation": "calls",
@@ -9761,9 +10179,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L131",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts_nakama_modules_private_table_createprivatetablerpc",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readplayerstats"
     },
     {
       "relation": "calls",
@@ -9772,9 +10190,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L147",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts_nakama_modules_private_table_createprivatetablerpc",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_writeplayerstats",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_writeplayerstats"
     },
     {
       "relation": "calls",
@@ -9783,9 +10201,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts_nakama_modules_private_table_createprivatetablerpc",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9794,9 +10212,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L97",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts_nakama_modules_private_table_gettableconfigrpc",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readtableconfig",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_readtableconfig"
     },
     {
       "relation": "calls",
@@ -9805,9 +10223,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L71",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts_nakama_modules_private_table_generateuniquetablecode",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_generatetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_generatetablecode"
     },
     {
       "relation": "calls",
@@ -9816,9 +10234,9 @@
       "source_file": "nakama_modules/private_table.ts",
       "source_location": "L143",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "nakama_modules_private_table_ts_nakama_modules_private_table_createprivatetablerpc",
-      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_generateuniquetablecode",
-      "confidence_score": 1.0
+      "target": "nakama_modules_private_table_ts_nakama_modules_private_table_generateuniquetablecode"
     },
     {
       "relation": "contains",
@@ -11540,5 +11958,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "9f9a1a681818183d38e058ffb6008f5840614e4d"
+  "built_at_commit": "4a0be93c8cdda31a9aa94b7a19aa47e56a805c85"
 }

@@ -19,7 +19,8 @@
     "shield_image": "",
     "height_variant": "standard",
     "glow_enabled": false,
-    "glow_color": ""
+    "glow_color": "",
+    "arena_type": "public"
   },
   "starter": {
     "name": "WOODEN LEAGUE",
@@ -35,7 +36,8 @@
     "shield_image": "",
     "height_variant": "standard",
     "glow_enabled": false,
-    "glow_color": ""
+    "glow_color": "",
+    "arena_type": "public"
   },
   "bronze": {
     "name": "IRON FORGE",
@@ -51,7 +53,8 @@
     "shield_image": "",
     "height_variant": "standard",
     "glow_enabled": false,
-    "glow_color": ""
+    "glow_color": "",
+    "arena_type": "public"
   },
   "silver": {
     "name": "SILVER LEAGUE",
@@ -67,7 +70,8 @@
     "shield_image": "",
     "height_variant": "standard",
     "glow_enabled": false,
-    "glow_color": ""
+    "glow_color": "",
+    "arena_type": "public"
   },
   "gold": {
     "name": "DIAMOND LOUNGE",
@@ -83,7 +87,8 @@
     "shield_image": "",
     "height_variant": "tall",
     "glow_enabled": true,
-    "glow_color": "#ff3b80"
+    "glow_color": "#ff3b80",
+    "arena_type": "public"
   },
   "platinum": {
     "name": "DIAMOND LEAGUE",
@@ -99,6 +104,24 @@
     "shield_image": "",
     "height_variant": "standard",
     "glow_enabled": true,
-    "glow_color": "#ffd700"
+    "glow_color": "#ffd700",
+    "arena_type": "public"
+  },
+  "private_table": {
+    "name": "PRIVATE ROOM",
+    "badge": "FRIENDS",
+    "badge_color": "purple",
+    "entry_fee": 100,
+    "offer_fee": 0,
+    "desc": "Host a private match and play with your friends.",
+    "gradient": "purple_deep",
+    "order": 6,
+    "jackpot": 0,
+    "tier_label": "PRIVATE",
+    "shield_image": "",
+    "height_variant": "standard",
+    "glow_enabled": false,
+    "glow_color": "",
+    "arena_type": "private"
   }
 }
