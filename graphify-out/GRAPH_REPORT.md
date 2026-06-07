@@ -1,16 +1,16 @@
 # Graph Report - u10-server  (2026-06-07)
 
 ## Corpus Check
-- 20 files · ~54,489 words
+- 20 files · ~54,542 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 444 nodes · 761 edges · 25 communities (24 shown, 1 thin omitted)
+- 476 nodes · 793 edges · 27 communities (26 shown, 1 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4a0be93c`
+- Built from commit: `9cb4f68b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -36,6 +36,8 @@
 - [[_COMMUNITY_Community 22|Community 22]]
 - [[_COMMUNITY_Community 23|Community 23]]
 - [[_COMMUNITY_Community 24|Community 24]]
+- [[_COMMUNITY_Community 25|Community 25]]
+- [[_COMMUNITY_Community 26|Community 26]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `practice` - 16 edges
@@ -44,15 +46,15 @@
 4. `silver` - 16 edges
 5. `gold` - 16 edges
 6. `platinum` - 16 edges
-7. `private_table` - 16 edges
-8. `readPlayerStats()` - 12 edges
-9. `writePlayerStats()` - 12 edges
-10. `readPlayerStats()` - 11 edges
+7. `titanium` - 16 edges
+8. `private` - 16 edges
+9. `private_table` - 16 edges
+10. `readPlayerStats()` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
 
-## Communities (25 total, 1 thin omitted)
+## Communities (27 total, 1 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.12
@@ -71,8 +73,8 @@ Cohesion: 0.24
 Nodes (22): CHALLENGE_CATEGORIES, CHALLENGE_POOL, claimSeasonalTierRpc(), claimWeeklyChallengeRpc(), getActiveSeason(), getISOWeekNumber(), getNextSeason(), getSeasonalConfig() (+14 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.12
-Nodes (16): bronze, arena_type, badge, badge_color, desc, entry_fee, glow_color, glow_enabled (+8 more)
+Cohesion: 0.05
+Nodes (37): bronze, arena_type, badge, badge_color, desc, entry_fee, glow_color, glow_enabled (+29 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.12
@@ -99,8 +101,8 @@ Cohesion: 0.33
 Nodes (5): Context, Initializer, Logger, Nakama, Session
 
 ### Community 11 - "Community 11"
-Cohesion: 0.05
-Nodes (37): gold, arena_type, badge, badge_color, desc, entry_fee, glow_color, glow_enabled (+29 more)
+Cohesion: 0.12
+Nodes (16): gold, arena_type, badge, badge_color, desc, entry_fee, glow_color, glow_enabled (+8 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.12
@@ -134,25 +136,33 @@ Nodes (7): createPrivateTableRpc(), generateTableCode(), generateUniqueTableCode
 Cohesion: 0.12
 Nodes (16): silver, arena_type, badge, badge_color, desc, entry_fee, glow_color, glow_enabled (+8 more)
 
+### Community 25 - "Community 25"
+Cohesion: 0.12
+Nodes (16): practice, arena_type, badge, badge_color, desc, entry_fee, glow_color, glow_enabled (+8 more)
+
+### Community 26 - "Community 26"
+Cohesion: 0.12
+Nodes (16): titanium, arena_type, badge, badge_color, desc, entry_fee, glow_color, glow_enabled (+8 more)
+
 ## Knowledge Gaps
-- **189 isolated node(s):** `entrypoint.sh script`, `public_max_players`, `private_max_players`, `private_create_cost`, `elimination_points` (+184 more)
+- **219 isolated node(s):** `entrypoint.sh script`, `public_max_players`, `private_max_players`, `private_create_cost`, `elimination_points` (+214 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `starter` connect `Community 16` to `Community 11`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
-- **Why does `bronze` connect `Community 4` to `Community 11`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
+- **Why does `practice` connect `Community 25` to `Community 4`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+- **Why does `starter` connect `Community 16` to `Community 4`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
 - **What connects `entrypoint.sh script`, `public_max_players`, `private_max_players` to the rest of the system?**
-  _189 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _219 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1214574898785425 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.11666666666666667 - nodes in this community are weakly interconnected._
 - **Should `Community 4` be split into smaller, more focused modules?**
-  _Cohesion score 0.125 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05263157894736842 - nodes in this community are weakly interconnected._
 - **Should `Community 5` be split into smaller, more focused modules?**
   _Cohesion score 0.125 - nodes in this community are weakly interconnected._

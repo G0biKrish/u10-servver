@@ -2,16 +2,21 @@
   "table_config": {
     "public_max_players": 5,
     "private_max_players": 5,
-    "private_create_cost": 100,
-    "elimination_points": [140, 180, 260, 340]
+    "private_create_cost": 300,
+    "elimination_points": [
+      140,
+      180,
+      260,
+      340
+    ]
   },
   "practice": {
-    "name": "WARM-UP",
+    "name": "WOODEN LEAGUE",
     "badge": "BEGINNER",
     "badge_color": "red",
     "entry_fee": 0,
     "offer_fee": 0,
-    "desc": "Play for free with bots. Gain experience.",
+    "desc": "Play for free. Gain experience.",
     "gradient": "red_magenta",
     "order": 0,
     "jackpot": 0,
@@ -23,7 +28,7 @@
     "arena_type": "public"
   },
   "starter": {
-    "name": "WOODEN LEAGUE",
+    "name": "STONE LEAGUE",
     "badge": "LEAGUE I",
     "badge_color": "teal",
     "entry_fee": 50,
@@ -40,7 +45,7 @@
     "arena_type": "public"
   },
   "bronze": {
-    "name": "IRON FORGE",
+    "name": "BRONZE FORGE",
     "badge": "LEAGUE II",
     "badge_color": "pink",
     "entry_fee": 250,
@@ -74,7 +79,7 @@
     "arena_type": "public"
   },
   "gold": {
-    "name": "DIAMOND LOUNGE",
+    "name": "GOLD LOUNGE",
     "badge": "ELITE ONLY",
     "badge_color": "purple",
     "entry_fee": 1000,
@@ -107,15 +112,32 @@
     "glow_color": "#ffd700",
     "arena_type": "public"
   },
-  "private_table": {
+  "titanium": {
+    "name": "TITANIUM LEAGUE",
+    "badge": "EXPERTS ONLY",
+    "badge_color": "gold",
+    "entry_fee": 5000,
+    "offer_fee": 0,
+    "desc": "Prove your expertise in the arena of champions.",
+    "gradient": "silver_blue",
+    "order": 6,
+    "jackpot": 0,
+    "tier_label": "ENTRY FEE",
+    "shield_image": "",
+    "height_variant": "standard",
+    "glow_enabled": true,
+    "glow_color": "#ffd700",
+    "arena_type": "public"
+  },
+  "private": {
     "name": "PRIVATE ROOM",
     "badge": "FRIENDS",
     "badge_color": "purple",
-    "entry_fee": 100,
+    "entry_fee": 300,
     "offer_fee": 0,
     "desc": "Host a private match and play with your friends.",
     "gradient": "purple_deep",
-    "order": 6,
+    "order": 7,
     "jackpot": 0,
     "tier_label": "PRIVATE",
     "shield_image": "",
