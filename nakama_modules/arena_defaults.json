@@ -1,4 +1,10 @@
 {
+  "table_config": {
+    "public_max_players": 5,
+    "private_max_players": 5,
+    "private_create_cost": 100,
+    "elimination_points": [140, 180, 260, 340]
+  },
   "practice": {
     "name": "WARM-UP",
     "badge": "BEGINNER",

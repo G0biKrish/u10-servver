@@ -7,6 +7,8 @@ const seasonalJs = fs.readFileSync(path.join(__dirname, 'seasonal.js'), 'utf8');
 const legalJs = fs.readFileSync(path.join(__dirname, 'legal_defaults.js'), 'utf8');
 const friendsJs = fs.readFileSync(path.join(__dirname, 'friends.js'), 'utf8');
 const matchmakingJs = fs.readFileSync(path.join(__dirname, 'matchmaking.js'), 'utf8');
+const privateTableJs = fs.readFileSync(path.join(__dirname, 'private_table.js'), 'utf8');
+
 
 function stripInitModule(content) {
   const marker = 'function InitModule(';
@@ -25,6 +27,7 @@ const cleanEconomy = cleanEconomyRaw.replace('/*ARENA_DEFAULTS_PLACEHOLDER*/', e
 const cleanSeasonal = stripInitModule(seasonalJs);
 const cleanFriends = stripInitModule(friendsJs);
 const cleanMatchmaking = stripInitModule(matchmakingJs);
+const cleanPrivateTable = stripInitModule(privateTableJs);
 
 const combinedInitModule = `
 // ─────────────────────────────────────────────────────────────────────────────
@@ -78,10 +81,17 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("escalate_matchmaking",   escalateMatchmakingRpc);
   initializer.registerRpc("cancel_matchmaking",     cancelMatchmakingRpc);
 
+  // Private Table RPCs
+  initializer.registerRpc("get_table_config",     getTableConfigRpc);
+  initializer.registerRpc("create_private_table",  createPrivateTableRpc);
+  initializer.registerRpc("join_private_table",    joinPrivateTableRpc);
+  initializer.registerRpc("cancel_private_table",  cancelPrivateTableRpc);
+
   logger.info("[Economy] Economy module loaded successfully.");
   logger.info("[Matchmaking] Matchmaking module loaded successfully.");
   logger.info("[Seasonal] Seasonal module loaded successfully.");
   logger.info("[Friends] Friends module loaded successfully.");
+  logger.info("[PrivateTable] Private table module loaded successfully.");
   logger.info("[Runtime] All U10 modules initialized successfully.");
 }
 `;
@@ -121,6 +131,11 @@ ${cleanFriends}
 // MATCHMAKING DOMAIN
 // ─────────────────────────────────────────────────────────────────────────────
 ${cleanMatchmaking}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRIVATE TABLE DOMAIN
+// ─────────────────────────────────────────────────────────────────────────────
+${cleanPrivateTable}
 ${combinedInitModule}
 `;
 

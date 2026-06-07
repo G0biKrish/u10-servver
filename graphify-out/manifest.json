@@ -10,8 +10,8 @@
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\build.js": {
-    "mtime": 1780773166.4048495,
-    "ast_hash": "1cf7adf9e8b8f9fa17ddbea4b4023e6e",
+    "mtime": 1780834204.1455624,
+    "ast_hash": "9e37f0e75462927d16a849eb3cf112d9",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\economy.js": {
@@ -25,13 +25,13 @@
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\index.js": {
-    "mtime": 1780774945.651903,
-    "ast_hash": "971cbdaf66fe529d4278cf99853d57ef",
+    "mtime": 1780834262.3433423,
+    "ast_hash": "4295ab742bee7c2bf8cc82daaf9b3065",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\nkruntime.d.ts": {
-    "mtime": 1779948178.1463625,
-    "ast_hash": "401f0a2fdbd1bdd57d45efa3076f9539",
+    "mtime": 1780834250.424267,
+    "ast_hash": "1f0e7892e998c16d7d7fe29b17630947",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\seasonal.js": {
@@ -70,8 +70,8 @@
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\arena_defaults.json": {
-    "mtime": 1780405491.1448636,
-    "ast_hash": "2fbdcb63304118311691ae70938b7af7",
+    "mtime": 1780834167.699017,
+    "ast_hash": "0276cdaaa464bd17337bf7dba423f02e",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\entrypoint.sh": {
@@ -80,13 +80,13 @@
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\matchmaking.js": {
-    "mtime": 1780773156.6134653,
-    "ast_hash": "dadd2ddd91f30aabcab1ad1dc4af11dd",
+    "mtime": 1780834255.6014948,
+    "ast_hash": "1626f6b09104b76a3e54057f708852d3",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\matchmaking.ts": {
-    "mtime": 1780773151.8927362,
-    "ast_hash": "73eab2f833bb592913036a237a7d54f7",
+    "mtime": 1780834239.3040495,
+    "ast_hash": "d3f819821fad214c19d3dd6159be44e8",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\docker-compose.prod.yml": {
@@ -102,6 +102,16 @@
   "D:\\GodotGames\\u10-server\\.github\\workflows\\deploy.yml": {
     "mtime": 1780750249.6270614,
     "ast_hash": "1e8aa8706c028e7ea198a904c86d3791",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\private_table.js": {
+    "mtime": 1780834259.486678,
+    "ast_hash": "49220cda0a8d8fd5bd057afc34432c93",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\private_table.ts": {
+    "mtime": 1780834186.8060913,
+    "ast_hash": "c3101e380db96ff76e5739b94023a818",
     "semantic_hash": ""
   }
 }

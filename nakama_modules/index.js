@@ -1798,7 +1798,7 @@ function readArenaConfig(nk) {
     }
     
     // Seed the DB on first load using injected defaults
-    var defaults = JSON.parse('{"practice":{"name":"WARM-UP","badge":"BEGINNER","badge_color":"red","entry_fee":0,"offer_fee":0,"desc":"Play for free with bots. Gain experience.","gradient":"red_magenta","order":0,"jackpot":0,"tier_label":"","shield_image":"","height_variant":"standard","glow_enabled":false,"glow_color":""},"starter":{"name":"WOODEN LEAGUE","badge":"LEAGUE I","badge_color":"teal","entry_fee":50,"offer_fee":0,"desc":"Beginner-friendly arena.","gradient":"teal_cyan","order":1,"jackpot":0,"tier_label":"","shield_image":"","height_variant":"standard","glow_enabled":false,"glow_color":""},"bronze":{"name":"IRON FORGE","badge":"LEAGUE II","badge_color":"pink","entry_fee":250,"offer_fee":0,"desc":"Step up the competition.","gradient":"pink_magenta","order":2,"jackpot":0,"tier_label":"","shield_image":"","height_variant":"standard","glow_enabled":false,"glow_color":""},"silver":{"name":"SILVER LEAGUE","badge":"LEAGUE III","badge_color":"silver","entry_fee":500,"offer_fee":0,"desc":"Balanced play for skilled callers.","gradient":"silver_blue","order":3,"jackpot":0,"tier_label":"","shield_image":"","height_variant":"standard","glow_enabled":false,"glow_color":""},"gold":{"name":"DIAMOND LOUNGE","badge":"ELITE ONLY","badge_color":"purple","entry_fee":1000,"offer_fee":0,"desc":"High stakes, maximum rewards. Pure chaos awaits.","gradient":"purple_deep","order":4,"jackpot":50000,"tier_label":"JACKPOT","shield_image":"","height_variant":"tall","glow_enabled":true,"glow_color":"#ff3b80"},"platinum":{"name":"DIAMOND LEAGUE","badge":"LEGENDARY ONLY","badge_color":"gold","entry_fee":2000,"offer_fee":0,"desc":"The pinnacle of skill. Only for the true masters of chaos.","gradient":"navy_gold","order":5,"jackpot":0,"tier_label":"ENTRY FEE","shield_image":"","height_variant":"standard","glow_enabled":true,"glow_color":"#ffd700"}}');
+    var defaults = JSON.parse('{"table_config":{"public_max_players":5,"private_max_players":5,"private_create_cost":100,"elimination_points":[140,180,260,340]},"practice":{"name":"WARM-UP","badge":"BEGINNER","badge_color":"red","entry_fee":0,"offer_fee":0,"desc":"Play for free with bots. Gain experience.","gradient":"red_magenta","order":0,"jackpot":0,"tier_label":"","shield_image":"","height_variant":"standard","glow_enabled":false,"glow_color":""},"starter":{"name":"WOODEN LEAGUE","badge":"LEAGUE I","badge_color":"teal","entry_fee":50,"offer_fee":0,"desc":"Beginner-friendly arena.","gradient":"teal_cyan","order":1,"jackpot":0,"tier_label":"","shield_image":"","height_variant":"standard","glow_enabled":false,"glow_color":""},"bronze":{"name":"IRON FORGE","badge":"LEAGUE II","badge_color":"pink","entry_fee":250,"offer_fee":0,"desc":"Step up the competition.","gradient":"pink_magenta","order":2,"jackpot":0,"tier_label":"","shield_image":"","height_variant":"standard","glow_enabled":false,"glow_color":""},"silver":{"name":"SILVER LEAGUE","badge":"LEAGUE III","badge_color":"silver","entry_fee":500,"offer_fee":0,"desc":"Balanced play for skilled callers.","gradient":"silver_blue","order":3,"jackpot":0,"tier_label":"","shield_image":"","height_variant":"standard","glow_enabled":false,"glow_color":""},"gold":{"name":"DIAMOND LOUNGE","badge":"ELITE ONLY","badge_color":"purple","entry_fee":1000,"offer_fee":0,"desc":"High stakes, maximum rewards. Pure chaos awaits.","gradient":"purple_deep","order":4,"jackpot":50000,"tier_label":"JACKPOT","shield_image":"","height_variant":"tall","glow_enabled":true,"glow_color":"#ff3b80"},"platinum":{"name":"DIAMOND LEAGUE","badge":"LEGENDARY ONLY","badge_color":"gold","entry_fee":2000,"offer_fee":0,"desc":"The pinnacle of skill. Only for the true masters of chaos.","gradient":"navy_gold","order":5,"jackpot":0,"tier_label":"ENTRY FEE","shield_image":"","height_variant":"standard","glow_enabled":true,"glow_color":"#ffd700"}}');
     nk.storageWrite([{
             collection: "system_config",
             key: "arena_list",
@@ -3410,153 +3410,395 @@ function searchUserByUsernameRpc(ctx, logger, nk, payload) {
 // ─────────────────────────────────────────────────────────────────────────────
 // MATCHMAKING DOMAIN
 // ─────────────────────────────────────────────────────────────────────────────
+"use strict";
 // =============================================================================
-// U10 — Server-Authoritative Matchmaking Module (JavaScript)
+// U10 — Server-Authoritative Matchmaking Module (TypeScript)
 // =============================================================================
-
 function getPlayerTier(level) {
-  return Math.floor((level - 1) / 10) + 1;
+    return Math.floor((level - 1) / 10) + 1;
 }
-
 function getArenaEntryFee(arenaId) {
-  var fees = {
-    "practice": 0,
-    "starter": 50,
-    "bronze": 250,
-    "silver": 500,
-    "gold": 1000,
-    "platinum": 2000
-  };
-  return fees[arenaId] !== undefined ? fees[arenaId] : 0;
+    const fees = {
+        "practice": 0,
+        "starter": 50,
+        "bronze": 250,
+        "silver": 500,
+        "gold": 1000,
+        "platinum": 2000
+    };
+    return fees[arenaId] !== undefined ? fees[arenaId] : 0;
 }
-
+function readTableConfig(nk) {
+    const defaults = {
+        public_max_players: 5,
+        private_max_players: 5,
+        private_create_cost: 100,
+        elimination_points: [140, 180, 260, 340]
+    };
+    try {
+        const result = nk.storageRead([{
+                collection: "system_config",
+                key: "arena_list",
+                userId: "00000000-0000-0000-0000-000000000000",
+            }]);
+        if (result && result.length > 0 && result[0].value) {
+            const config = result[0].value;
+            if (config.table_config) {
+                return config.table_config;
+            }
+        }
+    }
+    catch (e) {
+        // Non-fatal
+    }
+    return defaults;
+}
 // 1. Join Matchmaking Queue (Tamper-Proof)
 function joinMatchmakingQueueRpc(ctx, logger, nk, payload) {
-  var userId = ctx.userId;
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  var request = {};
-  try {
-    request = JSON.parse(payload || "{}");
-  } catch (e) {
-    throw new Error("Invalid JSON payload");
-  }
-
-  var arenaId = request.arena_id || "wooden";
-
-  // Authoritative database read for coins and level
-  var statsList = nk.storageRead([{ collection: "player_stats", key: "stats", userId: userId }]);
-  if (!statsList || statsList.length === 0) {
-    throw new Error("Player stats not found.");
-  }
-
-  var stats = statsList[0].value;
-  var level = stats.level || 1;
-  var coins = stats.coins || 0;
-  var myTier = getPlayerTier(level);
-
-  // Validate coins for entry fee
-  var entryFee = getArenaEntryFee(arenaId);
-  if (coins < entryFee) {
-    throw new Error("Insufficient coins to enter arena.");
-  }
-
-  var query = "+properties.tier:" + myTier + " +properties.arena_id:" + arenaId;
-  var stringProperties = { "arena_id": arenaId };
-  var numericProperties = { "tier": myTier };
-
-  // Securely add the presence to the matchmaker
-  var ticket = nk.matchmakerAdd(userId, query, 5, 5, stringProperties, numericProperties);
-  logger.info("[Matchmaking] Player " + userId + " joined matchmaking ticket " + ticket + " with Tier " + myTier);
-
-  return JSON.stringify({ ticket: ticket, success: true });
+    const userId = ctx.userId;
+    if (!userId) {
+        throw new Error("Unauthorized");
+    }
+    let request = {};
+    try {
+        request = JSON.parse(payload || "{}");
+    }
+    catch (e) {
+        throw new Error("Invalid JSON payload");
+    }
+    const arenaId = request.arena_id || "wooden";
+    // Authoritative database read for coins and level
+    const statsList = nk.storageRead([{ collection: "player_stats", key: "stats", userId }]);
+    if (!statsList || statsList.length === 0) {
+        throw new Error("Player stats not found.");
+    }
+    const stats = statsList[0].value;
+    const level = stats.level || 1;
+    const coins = stats.coins || 0;
+    const myTier = getPlayerTier(level);
+    // Validate coins for entry fee
+    const entryFee = getArenaEntryFee(arenaId);
+    if (coins < entryFee) {
+        throw new Error("Insufficient coins to enter arena.");
+    }
+    const query = `+properties.tier:${myTier} +properties.arena_id:${arenaId}`;
+    const stringProperties = { "arena_id": arenaId };
+    const numericProperties = { "tier": myTier };
+    // Securely add the presence to the matchmaker
+    const config = readTableConfig(nk);
+    const maxPlayers = config.public_max_players !== undefined ? config.public_max_players : 5;
+    const ticket = nk.matchmakerAdd(userId, query, maxPlayers, maxPlayers, stringProperties, numericProperties);
+    logger.info("[Matchmaking] Player %s joined matchmaking ticket %s with Tier %d (size: %d)", userId, ticket, myTier, maxPlayers);
+    return JSON.stringify({ ticket: ticket, success: true });
 }
-
 // 2. Escalate Matchmaking Range
 function escalateMatchmakingRpc(ctx, logger, nk, payload) {
-  var userId = ctx.userId;
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  var request = {};
-  try {
-    request = JSON.parse(payload || "{}");
-  } catch (e) {
-    throw new Error("Invalid JSON payload");
-  }
-
-  var oldTicket = request.ticket_id;
-  var escalationStep = request.step || 2;
-  var arenaId = request.arena_id || "wooden";
-
-  if (!oldTicket) {
-    throw new Error("Missing old ticket_id.");
-  }
-
-  // Remove old ticket
-  try {
-    nk.matchmakerRemove(userId, oldTicket);
-  } catch (e) {
-    logger.warn("[Matchmaking] Could not remove old ticket: " + oldTicket);
-  }
-
-  var statsList = nk.storageRead([{ collection: "player_stats", key: "stats", userId: userId }]);
-  if (!statsList || statsList.length === 0) {
-    throw new Error("Player stats not found.");
-  }
-
-  var stats = statsList[0].value;
-  var level = stats.level || 1;
-  var myTier = getPlayerTier(level);
-
-  var query = "";
-  if (escalationStep === 2) {
-    // Expand to own tier and next higher tier (+1)
-    query = "+properties.tier:>=" + myTier + " +properties.tier:<=" + (myTier + 1) + " +properties.arena_id:" + arenaId;
-  } else {
-    // Open query (match any tier, prioritizing proximity)
-    query = "+properties.arena_id:" + arenaId;
-  }
-
-  var stringProperties = { "arena_id": arenaId };
-  var numericProperties = { "tier": myTier };
-
-  var newTicket = nk.matchmakerAdd(userId, query, 5, 5, stringProperties, numericProperties);
-  logger.info("[Matchmaking] Escalated player " + userId + " to ticket " + newTicket + " with step " + escalationStep);
-
-  return JSON.stringify({ ticket: newTicket, success: true });
+    const userId = ctx.userId;
+    if (!userId) {
+        throw new Error("Unauthorized");
+    }
+    let request = {};
+    try {
+        request = JSON.parse(payload || "{}");
+    }
+    catch (e) {
+        throw new Error("Invalid JSON payload");
+    }
+    const oldTicket = request.ticket_id;
+    const escalationStep = request.step || 2;
+    const arenaId = request.arena_id || "wooden";
+    if (!oldTicket) {
+        throw new Error("Missing old ticket_id.");
+    }
+    // Remove old ticket
+    try {
+        nk.matchmakerRemove(userId, oldTicket);
+    }
+    catch (e) {
+        logger.warn("[Matchmaking] Could not remove old ticket: %s", oldTicket);
+    }
+    const statsList = nk.storageRead([{ collection: "player_stats", key: "stats", userId }]);
+    if (!statsList || statsList.length === 0) {
+        throw new Error("Player stats not found.");
+    }
+    const stats = statsList[0].value;
+    const level = stats.level || 1;
+    const myTier = getPlayerTier(level);
+    let query = "";
+    if (escalationStep === 2) {
+        // Expand to own tier and next higher tier (+1)
+        query = `+properties.tier:>=${myTier} +properties.tier:<=${myTier + 1} +properties.arena_id:${arenaId}`;
+    }
+    else {
+        // Open query (match any tier, prioritizing proximity)
+        query = `+properties.arena_id:${arenaId}`;
+    }
+    const stringProperties = { "arena_id": arenaId };
+    const numericProperties = { "tier": myTier };
+    const config = readTableConfig(nk);
+    const maxPlayers = config.public_max_players !== undefined ? config.public_max_players : 5;
+    const newTicket = nk.matchmakerAdd(userId, query, maxPlayers, maxPlayers, stringProperties, numericProperties);
+    logger.info("[Matchmaking] Escalated player %s to ticket %s with step %d (size: %d)", userId, newTicket, escalationStep, maxPlayers);
+    return JSON.stringify({ ticket: newTicket, success: true });
 }
-
 // 3. Cancel Matchmaking
 function cancelMatchmakingRpc(ctx, logger, nk, payload) {
-  var userId = ctx.userId;
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
+    const userId = ctx.userId;
+    if (!userId) {
+        throw new Error("Unauthorized");
+    }
+    let request = {};
+    try {
+        request = JSON.parse(payload || "{}");
+    }
+    catch (e) {
+        throw new Error("Invalid JSON payload");
+    }
+    const ticketId = request.ticket_id;
+    if (!ticketId) {
+        throw new Error("Missing ticket_id");
+    }
+    try {
+        nk.matchmakerRemove(userId, ticketId);
+        logger.info("[Matchmaking] Player %s cancelled ticket %s", userId, ticketId);
+    }
+    catch (e) {
+        logger.warn("[Matchmaking] Failed to remove ticket: %s", e.message);
+    }
+    return JSON.stringify({ success: true });
+}
 
-  var request = {};
-  try {
-    request = JSON.parse(payload || "{}");
-  } catch (e) {
-    throw new Error("Invalid JSON payload");
-  }
 
-  var ticketId = request.ticket_id;
-  if (!ticketId) {
-    throw new Error("Missing ticket_id");
-  }
-
-  try {
-    nk.matchmakerRemove(userId, ticketId);
-    logger.info("[Matchmaking] Player " + userId + " cancelled ticket " + ticketId);
-  } catch (e) {
-    logger.warn("[Matchmaking] Failed to remove ticket: " + e.message);
-  }
-
-  return JSON.stringify({ success: true });
+// ─────────────────────────────────────────────────────────────────────────────
+// PRIVATE TABLE DOMAIN
+// ─────────────────────────────────────────────────────────────────────────────
+"use strict";
+// =============================================================================
+// U10 — Private Table Module (TypeScript)
+// =============================================================================
+function readPlayerStats(nk, userId) {
+    const defaults = {
+        wins: 0, total_played: 0, best_streak: 0, lp: 0,
+        tier: "Bronze", coins: 0, level: 1, xp: 0,
+        last_wheel_spin: 0,
+        current_cycle: 1, active_streak_shields: 0, welcome_back_eligible: false,
+        weekly_claims: [false, false, false, false, false, false, false],
+        week_number: 0,
+        week_year: 0,
+        last_first_match_date: 0,
+        current_win_streak: 0,
+    };
+    const result = nk.storageRead([{ collection: "player_stats", key: "stats", userId }]);
+    return (result && result.length > 0) ? { ...defaults, ...result[0].value } : defaults;
+}
+function writePlayerStats(nk, userId, stats) {
+    nk.storageWrite([{
+            collection: "player_stats",
+            key: "stats",
+            userId,
+            value: stats,
+            permissionRead: 1,
+            permissionWrite: 1,
+        }]);
+}
+function readTableConfig(nk) {
+    const defaults = {
+        public_max_players: 5,
+        private_max_players: 5,
+        private_create_cost: 100,
+        elimination_points: [140, 180, 260, 340]
+    };
+    try {
+        const result = nk.storageRead([{
+                collection: "system_config",
+                key: "arena_list",
+                userId: "00000000-0000-0000-0000-000000000000",
+            }]);
+        if (result && result.length > 0 && result[0].value) {
+            const config = result[0].value;
+            if (config.table_config) {
+                return config.table_config;
+            }
+        }
+    }
+    catch (e) {
+        // Non-fatal fallback
+    }
+    return defaults;
+}
+function generateTableCode() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code1 = "";
+    let code2 = "";
+    for (let i = 0; i < 4; i++) {
+        code1 += chars.charAt(Math.floor(Math.random() * chars.length));
+        code2 += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `${code1}-${code2}`;
+}
+function generateUniqueTableCode(nk) {
+    let attempts = 0;
+    while (attempts < 10) {
+        const code = generateTableCode();
+        const read = nk.storageRead([{
+                collection: "private_tables",
+                key: code,
+                userId: "00000000-0000-0000-0000-000000000000",
+            }]);
+        if (!read || read.length === 0) {
+            return code;
+        }
+        attempts++;
+    }
+    throw new Error("Failed to generate unique table code after 10 attempts.");
+}
+// ---------------------------------------------------------------------------
+// RPC: get_table_config
+// ---------------------------------------------------------------------------
+function getTableConfigRpc(ctx, logger, nk, _payload) {
+    if (!ctx.userId) {
+        throw new Error("Unauthenticated");
+    }
+    const config = readTableConfig(nk);
+    return JSON.stringify({ success: true, table_config: config });
+}
+// ---------------------------------------------------------------------------
+// RPC: create_private_table
+// ---------------------------------------------------------------------------
+function createPrivateTableRpc(ctx, logger, nk, payload) {
+    const userId = ctx.userId;
+    if (!userId) {
+        throw new Error("Unauthenticated");
+    }
+    let request = {};
+    try {
+        request = JSON.parse(payload || "{}");
+    }
+    catch (e) {
+        throw new Error("Invalid JSON payload");
+    }
+    const arenaTier = request.arena_tier || "practice";
+    const eliminationPoints = request.elimination_points || 180;
+    const partyId = request.party_id;
+    if (!partyId) {
+        throw new Error("Missing party_id");
+    }
+    const config = readTableConfig(nk);
+    const stats = readPlayerStats(nk, userId);
+    // Determine effective creation cost
+    let cost = config.private_create_cost !== undefined ? config.private_create_cost : 100;
+    if (stats.level >= 500) {
+        cost = 0;
+    }
+    if (stats.coins < cost) {
+        throw new Error("Insufficient coins to create a private table.");
+    }
+    const code = generateUniqueTableCode(nk);
+    if (cost > 0) {
+        stats.coins -= cost;
+        writePlayerStats(nk, userId, stats);
+        nk.walletUpdate(userId, { coins: -cost }, { source: "private_table_creation", code });
+        logger.info(`[PrivateTable] Player ${userId} paid ${cost} coins to create table ${code}`);
+    }
+    else {
+        logger.info(`[PrivateTable] Player ${userId} (level ${stats.level}) created table ${code} for free`);
+    }
+    const tableRecord = {
+        code: code,
+        party_id: partyId,
+        host_id: userId,
+        arena_tier: arenaTier,
+        elimination_points: eliminationPoints,
+        max_players: config.private_max_players || 5,
+        created_at: Date.now(),
+        status: "waiting"
+    };
+    nk.storageWrite([{
+            collection: "private_tables",
+            key: code,
+            userId: "00000000-0000-0000-0000-000000000000",
+            value: tableRecord,
+            permissionRead: 2,
+            permissionWrite: 0,
+        }]);
+    return JSON.stringify({ success: true, code: code, cost_paid: cost, table: tableRecord });
+}
+// ---------------------------------------------------------------------------
+// RPC: join_private_table
+// ---------------------------------------------------------------------------
+function joinPrivateTableRpc(ctx, logger, nk, payload) {
+    const userId = ctx.userId;
+    if (!userId) {
+        throw new Error("Unauthenticated");
+    }
+    let request = {};
+    try {
+        request = JSON.parse(payload || "{}");
+    }
+    catch (e) {
+        throw new Error("Invalid JSON payload");
+    }
+    const code = (request.code || "").toUpperCase().trim();
+    if (!code) {
+        throw new Error("Missing code");
+    }
+    const result = nk.storageRead([{
+            collection: "private_tables",
+            key: code,
+            userId: "00000000-0000-0000-0000-000000000000",
+        }]);
+    if (!result || result.length === 0) {
+        return JSON.stringify({ success: false, error: "Table not found." });
+    }
+    const table = result[0].value;
+    if (table.status !== "waiting") {
+        return JSON.stringify({ success: false, error: "Table game is already in progress or cancelled." });
+    }
+    return JSON.stringify({
+        success: true,
+        party_id: table.party_id,
+        arena_tier: table.arena_tier,
+        elimination_points: table.elimination_points
+    });
+}
+// ---------------------------------------------------------------------------
+// RPC: cancel_private_table
+// ---------------------------------------------------------------------------
+function cancelPrivateTableRpc(ctx, logger, nk, payload) {
+    const userId = ctx.userId;
+    if (!userId) {
+        throw new Error("Unauthenticated");
+    }
+    let request = {};
+    try {
+        request = JSON.parse(payload || "{}");
+    }
+    catch (e) {
+        throw new Error("Invalid JSON payload");
+    }
+    const code = (request.code || "").toUpperCase().trim();
+    if (!code) {
+        throw new Error("Missing code");
+    }
+    const result = nk.storageRead([{
+            collection: "private_tables",
+            key: code,
+            userId: "00000000-0000-0000-0000-000000000000",
+        }]);
+    if (!result || result.length === 0) {
+        return JSON.stringify({ success: false, error: "Table not found." });
+    }
+    const table = result[0].value;
+    if (table.host_id !== userId) {
+        return JSON.stringify({ success: false, error: "Only the host can cancel the table." });
+    }
+    nk.storageDelete([{
+            collection: "private_tables",
+            key: code,
+            userId: "00000000-0000-0000-0000-000000000000"
+        }]);
+    logger.info(`[PrivateTable] Table ${code} cancelled by host ${userId}`);
+    return JSON.stringify({ success: true });
 }
 
 
@@ -3611,10 +3853,17 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("escalate_matchmaking",   escalateMatchmakingRpc);
   initializer.registerRpc("cancel_matchmaking",     cancelMatchmakingRpc);
 
+  // Private Table RPCs
+  initializer.registerRpc("get_table_config",     getTableConfigRpc);
+  initializer.registerRpc("create_private_table",  createPrivateTableRpc);
+  initializer.registerRpc("join_private_table",    joinPrivateTableRpc);
+  initializer.registerRpc("cancel_private_table",  cancelPrivateTableRpc);
+
   logger.info("[Economy] Economy module loaded successfully.");
   logger.info("[Matchmaking] Matchmaking module loaded successfully.");
   logger.info("[Seasonal] Seasonal module loaded successfully.");
   logger.info("[Friends] Friends module loaded successfully.");
+  logger.info("[PrivateTable] Private table module loaded successfully.");
   logger.info("[Runtime] All U10 modules initialized successfully.");
 }
 

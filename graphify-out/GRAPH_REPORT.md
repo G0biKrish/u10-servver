@@ -1,16 +1,16 @@
 # Graph Report - u10-server  (2026-06-07)
 
 ## Corpus Check
-- 18 files · ~51,784 words
+- 20 files · ~54,426 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 386 nodes · 681 edges · 22 communities (21 shown, 1 thin omitted)
+- 422 nodes · 739 edges · 24 communities (23 shown, 1 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `1d601cfa`
+- Built from commit: `9f9a1a68`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -33,6 +33,8 @@
 - [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
 - [[_COMMUNITY_Community 21|Community 21]]
+- [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `practice` - 15 edges
@@ -41,15 +43,15 @@
 4. `silver` - 15 edges
 5. `gold` - 15 edges
 6. `platinum` - 15 edges
-7. `readPlayerStats()` - 11 edges
-8. `writePlayerStats()` - 11 edges
+7. `readPlayerStats()` - 12 edges
+8. `writePlayerStats()` - 12 edges
 9. `readPlayerStats()` - 11 edges
 10. `writePlayerStats()` - 11 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
 
-## Communities (22 total, 1 thin omitted)
+## Communities (24 total, 1 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.12
@@ -73,15 +75,15 @@ Nodes (15): bronze, badge, badge_color, desc, entry_fee, glow_color, glow_enable
 
 ### Community 5 - "Community 5"
 Cohesion: 0.06
-Nodes (30): platinum, badge, badge_color, desc, entry_fee, glow_color, glow_enabled, gradient (+22 more)
+Nodes (35): platinum, badge, badge_color, desc, entry_fee, glow_color, glow_enabled, gradient (+27 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.07
-Nodes (64): adCallbackRpc(), applyAdMultiplierRpc(), ARENA_ENTRY_FEES, buyCosmeticRpc(), calculateTier(), CHALLENGE_CATEGORIES, CHALLENGE_POOL, claimDailyLoginRpc() (+56 more)
+Cohesion: 0.06
+Nodes (69): adCallbackRpc(), applyAdMultiplierRpc(), ARENA_ENTRY_FEES, buyCosmeticRpc(), calculateTier(), CHALLENGE_CATEGORIES, CHALLENGE_POOL, claimDailyLoginRpc() (+61 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.11
-Nodes (16): arenaDefaults, authJs, cleanAuth, cleanEconomy, cleanEconomyRaw, cleanFriends, cleanMatchmaking, cleanSeasonal (+8 more)
+Cohesion: 0.10
+Nodes (18): arenaDefaults, authJs, cleanAuth, cleanEconomy, cleanEconomyRaw, cleanFriends, cleanMatchmaking, cleanPrivateTable (+10 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.28
@@ -101,7 +103,7 @@ Nodes (15): practice, badge, badge_color, desc, entry_fee, glow_color, glow_enab
 
 ### Community 16 - "Community 16"
 Cohesion: 0.13
-Nodes (15): silver, badge, badge_color, desc, entry_fee, glow_color, glow_enabled, gradient (+7 more)
+Nodes (15): starter, badge, badge_color, desc, entry_fee, glow_color, glow_enabled, gradient (+7 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.07
@@ -112,15 +114,23 @@ Cohesion: 0.13
 Nodes (15): gold, badge, badge_color, desc, entry_fee, glow_color, glow_enabled, gradient (+7 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.53
-Nodes (4): escalateMatchmakingRpc(), getArenaEntryFee(), getPlayerTier(), joinMatchmakingQueueRpc()
+Cohesion: 0.52
+Nodes (5): escalateMatchmakingRpc(), getArenaEntryFee(), getPlayerTier(), joinMatchmakingQueueRpc(), readTableConfig()
 
 ### Community 20 - "Community 20"
-Cohesion: 0.53
-Nodes (4): escalateMatchmakingRpc(), getArenaEntryFee(), getPlayerTier(), joinMatchmakingQueueRpc()
+Cohesion: 0.52
+Nodes (5): escalateMatchmakingRpc(), getArenaEntryFee(), getPlayerTier(), joinMatchmakingQueueRpc(), readTableConfig()
+
+### Community 22 - "Community 22"
+Cohesion: 0.33
+Nodes (7): createPrivateTableRpc(), generateTableCode(), generateUniqueTableCode(), getTableConfigRpc(), readPlayerStats(), readTableConfig(), writePlayerStats()
+
+### Community 23 - "Community 23"
+Cohesion: 0.33
+Nodes (7): createPrivateTableRpc(), generateTableCode(), generateUniqueTableCode(), getTableConfigRpc(), readPlayerStats(), readTableConfig(), writePlayerStats()
 
 ## Knowledge Gaps
-- **162 isolated node(s):** `entrypoint.sh script`, `name`, `badge`, `badge_color`, `entry_fee` (+157 more)
+- **168 isolated node(s):** `entrypoint.sh script`, `public_max_players`, `private_max_players`, `private_create_cost`, `elimination_points` (+163 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -128,16 +138,16 @@ Nodes (4): escalateMatchmakingRpc(), getArenaEntryFee(), getPlayerTier(), joinMa
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `practice` connect `Community 11` to `Community 5`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `starter` connect `Community 16` to `Community 5`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Why does `bronze` connect `Community 4` to `Community 5`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
-- **What connects `entrypoint.sh script`, `name`, `badge` to the rest of the system?**
-  _162 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **What connects `entrypoint.sh script`, `public_max_players`, `private_max_players` to the rest of the system?**
+  _168 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1214574898785425 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.11666666666666667 - nodes in this community are weakly interconnected._
 - **Should `Community 4` be split into smaller, more focused modules?**
   _Cohesion score 0.13333333333333333 - nodes in this community are weakly interconnected._
-- **Should `Community 5` be split into smaller, more focused modules?**
-  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._

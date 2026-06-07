@@ -18,6 +18,32 @@ function getArenaEntryFee(arenaId: string): number {
   return fees[arenaId] !== undefined ? fees[arenaId] : 0;
 }
 
+function readTableConfig(nk: nkruntime.Nakama): any {
+  const defaults = {
+    public_max_players: 5,
+    private_max_players: 5,
+    private_create_cost: 100,
+    elimination_points: [140, 180, 260, 340]
+  };
+  try {
+    const result = nk.storageRead([{
+      collection: "system_config",
+      key: "arena_list",
+      userId: "00000000-0000-0000-0000-000000000000",
+    }]);
+    if (result && result.length > 0 && result[0].value) {
+      const config = result[0].value as any;
+      if (config.table_config) {
+        return config.table_config;
+      }
+    }
+  } catch (e) {
+    // Non-fatal
+  }
+  return defaults;
+}
+
+
 // 1. Join Matchmaking Queue (Tamper-Proof)
 function joinMatchmakingQueueRpc(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, payload: string): string {
   const userId = ctx.userId;
@@ -56,8 +82,10 @@ function joinMatchmakingQueueRpc(ctx: nkruntime.Context, logger: nkruntime.Logge
   const numericProperties = { "tier": myTier };
 
   // Securely add the presence to the matchmaker
-  const ticket = nk.matchmakerAdd(userId, query, 5, 5, stringProperties, numericProperties);
-  logger.info("[Matchmaking] Player %s joined matchmaking ticket %s with Tier %d", userId, ticket, myTier);
+  const config = readTableConfig(nk);
+  const maxPlayers = config.public_max_players !== undefined ? config.public_max_players : 5;
+  const ticket = nk.matchmakerAdd(userId, query, maxPlayers, maxPlayers, stringProperties, numericProperties);
+  logger.info("[Matchmaking] Player %s joined matchmaking ticket %s with Tier %d (size: %d)", userId, ticket, myTier, maxPlayers);
 
   return JSON.stringify({ ticket: ticket, success: true });
 }
@@ -112,8 +140,10 @@ function escalateMatchmakingRpc(ctx: nkruntime.Context, logger: nkruntime.Logger
   const stringProperties = { "arena_id": arenaId };
   const numericProperties = { "tier": myTier };
 
-  const newTicket = nk.matchmakerAdd(userId, query, 5, 5, stringProperties, numericProperties);
-  logger.info("[Matchmaking] Escalated player %s to ticket %s with step %d", userId, newTicket, escalationStep);
+  const config = readTableConfig(nk);
+  const maxPlayers = config.public_max_players !== undefined ? config.public_max_players : 5;
+  const newTicket = nk.matchmakerAdd(userId, query, maxPlayers, maxPlayers, stringProperties, numericProperties);
+  logger.info("[Matchmaking] Escalated player %s to ticket %s with step %d (size: %d)", userId, newTicket, escalationStep, maxPlayers);
 
   return JSON.stringify({ ticket: newTicket, success: true });
 }
@@ -141,7 +171,7 @@ function cancelMatchmakingRpc(ctx: nkruntime.Context, logger: nkruntime.Logger, 
     nk.matchmakerRemove(userId, ticketId);
     logger.info("[Matchmaking] Player %s cancelled ticket %s", userId, ticketId);
   } catch (e) {
-    logger.warn("[Matchmaking] Failed to remove ticket: %s", e.message);
+    logger.warn("[Matchmaking] Failed to remove ticket: %s", (e as any).message);
   }
 
   return JSON.stringify({ success: true });

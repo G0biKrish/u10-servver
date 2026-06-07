@@ -16,6 +16,9 @@ declare namespace nkruntime {
     walletUpdate(userId: string, changes: any, metadata?: any, rollbackUserWallet?: boolean): void;
     uuidV4(): string;
     accountUpdateId(userId: string, username?: string | null, displayName?: string | null, timezone?: string | null, location?: string | null, langTag?: string | null, avatarUrl?: string | null, metadata?: any): void;
+    matchmakerAdd(userId: string, query: string, minCount: number, maxCount: number, stringProperties?: any, numericProperties?: any, countMultiple?: number): string;
+    matchmakerRemove(userId: string, ticket: string): void;
+    usersGetUsername(usernames: string[]): any[];
   }
   interface Initializer {
     registerRpc(id: string, fn: Function): void;
