@@ -1,17 +1,17 @@
 {
   "D:\\GodotGames\\u10-server\\nakama_modules\\auth.js": {
-    "mtime": 1780253591.5266697,
-    "ast_hash": "f5a1e0bfa0e5e8d8b34dd6eb8889f80d",
+    "mtime": 1780763357.759912,
+    "ast_hash": "58ffac1b1b4438f15ca0164d63568739",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\auth.ts": {
-    "mtime": 1780253584.9728253,
-    "ast_hash": "e7f501bedd2b38bc1471fb3d6342bdd4",
+    "mtime": 1780763357.7609117,
+    "ast_hash": "2df4919fc9ded82124509729b1bb890a",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\build.js": {
-    "mtime": 1780336838.6260107,
-    "ast_hash": "a014b0e901c6235b8e07bf39e13fb0bd",
+    "mtime": 1780773166.4048495,
+    "ast_hash": "1cf7adf9e8b8f9fa17ddbea4b4023e6e",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\economy.js": {
@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\index.js": {
-    "mtime": 1780400637.2655811,
-    "ast_hash": "2a19604d889363d02634e37a7265974f",
+    "mtime": 1780774945.651903,
+    "ast_hash": "971cbdaf66fe529d4278cf99853d57ef",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\nkruntime.d.ts": {
@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\docker-compose.yml": {
-    "mtime": 1779690506.786688,
-    "ast_hash": "c00015e148b4a00ab71f03dc8bf0584e",
+    "mtime": 1780768895.5704646,
+    "ast_hash": "455ee43b85cff409d47534ab83251c03",
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\legal_defaults.js": {
@@ -70,8 +70,38 @@
     "semantic_hash": ""
   },
   "D:\\GodotGames\\u10-server\\nakama_modules\\arena_defaults.json": {
-    "mtime": 1780400630.9636164,
-    "ast_hash": "eda65e1309e3d2049e97ee713a8daae4",
+    "mtime": 1780405491.1448636,
+    "ast_hash": "2fbdcb63304118311691ae70938b7af7",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\entrypoint.sh": {
+    "mtime": 1780768895.5709634,
+    "ast_hash": "9e15ee4de28b51ec6ec3e1f732aa303c",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\matchmaking.js": {
+    "mtime": 1780773156.6134653,
+    "ast_hash": "dadd2ddd91f30aabcab1ad1dc4af11dd",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\nakama_modules\\matchmaking.ts": {
+    "mtime": 1780773151.8927362,
+    "ast_hash": "73eab2f833bb592913036a237a7d54f7",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\docker-compose.prod.yml": {
+    "mtime": 1780768895.5699646,
+    "ast_hash": "2accac1278002afbb0b194211d509478",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\oracle-nakama-deploy.md": {
+    "mtime": 1780763357.763412,
+    "ast_hash": "80d169b0daef3e24b73570ec1af65112",
+    "semantic_hash": ""
+  },
+  "D:\\GodotGames\\u10-server\\.github\\workflows\\deploy.yml": {
+    "mtime": 1780750249.6270614,
+    "ast_hash": "1e8aa8706c028e7ea198a904c86d3791",
     "semantic_hash": ""
   }
 }
