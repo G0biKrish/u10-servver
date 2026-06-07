@@ -32,7 +32,8 @@ function readTableConfig(nk) {
         public_max_players: 5,
         private_max_players: 5,
         private_create_cost: 100,
-        elimination_points: [140, 180, 260, 340]
+        elimination_points: [140, 180, 260, 340],
+        code_length: 6
     };
     try {
         const result = nk.storageRead([{
@@ -43,7 +44,7 @@ function readTableConfig(nk) {
         if (result && result.length > 0 && result[0].value) {
             const config = result[0].value;
             if (config.table_config) {
-                return config.table_config;
+                return { ...defaults, ...config.table_config };
             }
         }
     }
@@ -52,20 +53,31 @@ function readTableConfig(nk) {
     }
     return defaults;
 }
-function generateTableCode() {
+function generateTableCode(nk) {
+    const config = readTableConfig(nk);
+    const length = config.code_length || 6;
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let code1 = "";
-    let code2 = "";
-    for (let i = 0; i < 4; i++) {
-        code1 += chars.charAt(Math.floor(Math.random() * chars.length));
-        code2 += chars.charAt(Math.floor(Math.random() * chars.length));
+
+    if (length === 8) {
+        let code1 = "";
+        let code2 = "";
+        for (let i = 0; i < 4; i++) {
+            code1 += chars.charAt(Math.floor(Math.random() * chars.length));
+            code2 += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return `${code1}-${code2}`;
+    } else {
+        let code = "";
+        for (let i = 0; i < length; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
     }
-    return `${code1}-${code2}`;
 }
 function generateUniqueTableCode(nk) {
     let attempts = 0;
     while (attempts < 10) {
-        const code = generateTableCode();
+        const code = generateTableCode(nk);
         const read = nk.storageRead([{
                 collection: "private_tables",
                 key: code,
