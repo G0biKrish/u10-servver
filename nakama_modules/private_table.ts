@@ -95,6 +95,50 @@ function generateUniqueTableCode(nk: nkruntime.Nakama): string {
 }
 
 // ---------------------------------------------------------------------------
+// Helper: Cleanup Inactive Tables
+// ---------------------------------------------------------------------------
+function cleanupInactiveTables(nk: nkruntime.Nakama, logger: nkruntime.Logger): void {
+  try {
+    const oneHourAgo = Date.now() - 3600000; // 1 hour in ms
+    let cursor: string | null = null;
+    let deleteCount = 0;
+
+    do {
+      const result = nk.storageList(null, "private_tables", 100, cursor);
+      const objects = result.objects || [];
+      if (objects.length === 0) {
+        break;
+      }
+
+      const toDelete: any[] = [];
+      for (const obj of objects) {
+        const table = obj.value as any;
+        if (table && table.created_at && table.created_at < oneHourAgo) {
+          toDelete.push({
+            collection: "private_tables",
+            key: obj.key,
+            userId: "00000000-0000-0000-0000-000000000000"
+          });
+        }
+      }
+
+      if (toDelete.length > 0) {
+        nk.storageDelete(toDelete);
+        deleteCount += toDelete.length;
+      }
+
+      cursor = result.cursor || null;
+    } while (cursor);
+
+    if (deleteCount > 0) {
+      logger.info(`[PrivateTable] Cleaned up ${deleteCount} inactive private tables older than 1 hour.`);
+    }
+  } catch (e) {
+    logger.error(`[PrivateTable] Error during inactive tables cleanup: ${e}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // RPC: get_table_config
 // ---------------------------------------------------------------------------
 function getTableConfigRpc(
@@ -119,6 +163,8 @@ function createPrivateTableRpc(
   nk: nkruntime.Nakama,
   payload: string
 ): string {
+  cleanupInactiveTables(nk, logger);
+
   const userId = ctx.userId;
   if (!userId) {
     throw new Error("Unauthenticated");
@@ -195,6 +241,8 @@ function joinPrivateTableRpc(
   nk: nkruntime.Nakama,
   payload: string
 ): string {
+  cleanupInactiveTables(nk, logger);
+
   const userId = ctx.userId;
   if (!userId) {
     throw new Error("Unauthenticated");

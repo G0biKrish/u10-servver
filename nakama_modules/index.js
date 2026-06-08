@@ -3665,6 +3665,45 @@ function generateUniqueTableCode(nk) {
     throw new Error("Failed to generate unique table code after 10 attempts.");
 }
 // ---------------------------------------------------------------------------
+// Helper: Cleanup Inactive Tables
+// ---------------------------------------------------------------------------
+function cleanupInactiveTables(nk, logger) {
+    try {
+        const oneHourAgo = Date.now() - 3600000; // 1 hour in ms
+        let cursor = null;
+        let deleteCount = 0;
+        do {
+            const result = nk.storageList(null, "private_tables", 100, cursor);
+            const objects = result.objects || [];
+            if (objects.length === 0) {
+                break;
+            }
+            const toDelete = [];
+            for (const obj of objects) {
+                const table = obj.value;
+                if (table && table.created_at && table.created_at < oneHourAgo) {
+                    toDelete.push({
+                        collection: "private_tables",
+                        key: obj.key,
+                        userId: "00000000-0000-0000-0000-000000000000"
+                    });
+                }
+            }
+            if (toDelete.length > 0) {
+                nk.storageDelete(toDelete);
+                deleteCount += toDelete.length;
+            }
+            cursor = result.cursor || null;
+        } while (cursor);
+        if (deleteCount > 0) {
+            logger.info(`[PrivateTable] Cleaned up ${deleteCount} inactive private tables older than 1 hour.`);
+        }
+    }
+    catch (e) {
+        logger.error(`[PrivateTable] Error during inactive tables cleanup: ${e}`);
+    }
+}
+// ---------------------------------------------------------------------------
 // RPC: get_table_config
 // ---------------------------------------------------------------------------
 function getTableConfigRpc(ctx, logger, nk, _payload) {
@@ -3678,6 +3717,7 @@ function getTableConfigRpc(ctx, logger, nk, _payload) {
 // RPC: create_private_table
 // ---------------------------------------------------------------------------
 function createPrivateTableRpc(ctx, logger, nk, payload) {
+    cleanupInactiveTables(nk, logger);
     const userId = ctx.userId;
     if (!userId) {
         throw new Error("Unauthenticated");
@@ -3739,6 +3779,7 @@ function createPrivateTableRpc(ctx, logger, nk, payload) {
 // RPC: join_private_table
 // ---------------------------------------------------------------------------
 function joinPrivateTableRpc(ctx, logger, nk, payload) {
+    cleanupInactiveTables(nk, logger);
     const userId = ctx.userId;
     if (!userId) {
         throw new Error("Unauthenticated");

@@ -13,6 +13,7 @@ declare namespace nkruntime {
     storageRead(objects: any[]): any[];
     storageWrite(objects: any[]): void;
     storageDelete(objects: any[]): void;
+    storageList(userId: string | null, collection: string, limit: number, cursor?: string | null): any;
     walletUpdate(userId: string, changes: any, metadata?: any, rollbackUserWallet?: boolean): void;
     uuidV4(): string;
     accountUpdateId(userId: string, username?: string | null, displayName?: string | null, timezone?: string | null, location?: string | null, langTag?: string | null, avatarUrl?: string | null, metadata?: any): void;
