@@ -86,6 +86,7 @@ function InitModule(ctx, logger, nk, initializer) {
   initializer.registerRpc("create_private_table",  createPrivateTableRpc);
   initializer.registerRpc("join_private_table",    joinPrivateTableRpc);
   initializer.registerRpc("cancel_private_table",  cancelPrivateTableRpc);
+  initializer.registerRpc("get_player_profiles",   getPlayerProfilesRpc);
 
   logger.info("[Economy] Economy module loaded successfully.");
   logger.info("[Matchmaking] Matchmaking module loaded successfully.");

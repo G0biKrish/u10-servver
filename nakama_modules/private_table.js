@@ -279,3 +279,53 @@ function cancelPrivateTableRpc(ctx, logger, nk, payload) {
     logger.info(`[PrivateTable] Table ${code} cancelled by host ${userId}`);
     return JSON.stringify({ success: true });
 }
+// ---------------------------------------------------------------------------
+// RPC: get_player_profiles
+// ---------------------------------------------------------------------------
+function getPlayerProfilesRpc(ctx, logger, nk, payload) {
+    if (!ctx.userId) {
+        throw new Error("Unauthenticated");
+    }
+    let request = {};
+    try {
+        request = JSON.parse(payload || "{}");
+    }
+    catch (_e) {
+        throw new Error("Invalid JSON payload");
+    }
+    const userIds = request.user_ids || [];
+    if (userIds.length === 0) {
+        return JSON.stringify({ success: true, profiles: {} });
+    }
+    const profiles = {};
+    try {
+        const users = nk.usersGetId(userIds);
+        const readObjects = userIds.map(uid => ({
+            collection: "player_stats",
+            key: "stats",
+            userId: uid
+        }));
+        const statsResults = nk.storageRead(readObjects);
+        const statsMap = {};
+        for (const res of statsResults) {
+            statsMap[res.userId] = res.value;
+        }
+        for (const u of users) {
+            const stats = statsMap[u.userId] || {};
+            profiles[u.userId] = {
+                user_id: u.userId,
+                username: u.username,
+                display_name: u.displayName || u.username,
+                avatar_url: u.avatarUrl || "",
+                level: stats.level || 1,
+                tier: stats.tier || "Bronze"
+            };
+        }
+    }
+    catch (e) {
+        logger.error(`[PrivateTable] Error fetching player profiles: ${e.message}`);
+        return JSON.stringify({ success: false, error: e.message });
+    }
+    return JSON.stringify({ success: true, profiles: profiles });
+}
+
