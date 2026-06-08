@@ -279,7 +279,8 @@ function joinPrivateTableRpc(
     success: true,
     party_id: table.party_id,
     arena_tier: table.arena_tier,
-    elimination_points: table.elimination_points
+    elimination_points: table.elimination_points,
+    host_id: table.host_id
   });
 }
 
